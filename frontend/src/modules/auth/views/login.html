@@ -1,0 +1,70 @@
+<main class="login-page">
+  <section class="login-panel">
+    <div class="login-brand">
+      <span class="brand-mark"><span></span><span></span><span></span><span></span></span>
+      <span>Northstar <strong>IT</strong></span>
+    </div>
+
+    <div class="login-copy">
+      <span class="eyebrow">IT OPERATIONS PORTAL</span>
+      <h1>Good work starts with a clear view.</h1>
+      <p>Sign in to manage support, people, and the equipment your teams depend on.</p>
+    </div>
+
+    <div class="login-form-wrap">
+      <div class="section-kicker">SECURE SIGN IN</div>
+      <h2>Welcome back</h2>
+      <p class="muted">Use your organization account to continue.</p>
+
+      <div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+      <form name="loginForm" ng-submit="vm.submit()" novalidate>
+        <label class="field-label" for="login-email">Work email</label>
+        <div class="input-wrap">
+          <span class="input-symbol" aria-hidden="true">@</span>
+          <input id="login-email" name="email" type="email" ng-model="vm.credentials.email" placeholder="you@company.com" autocomplete="username" required autofocus />
+        </div>
+        <div class="field-error" ng-messages="loginForm.email.$error" ng-if="loginForm.email.$touched">
+          <span ng-message="required">Enter your work email.</span>
+          <span ng-message="email">Enter a valid email address.</span>
+        </div>
+
+        <div class="password-label-row">
+          <label class="field-label" for="login-password">Password</label>
+        </div>
+        <div class="input-wrap">
+          <span class="input-symbol" aria-hidden="true">⌑</span>
+          <input id="login-password" name="password" type="password" ng-model="vm.credentials.password" placeholder="Enter your password" autocomplete="current-password" required />
+        </div>
+        <div class="field-error" ng-messages="loginForm.password.$error" ng-if="loginForm.password.$touched">
+          <span ng-message="required">Enter your password.</span>
+        </div>
+
+        <button class="button button-primary login-submit" type="submit" ng-disabled="loginForm.$invalid || vm.busy">
+          <span>{{ vm.busy ? 'Signing in…' : 'Sign in to workspace' }}</span>
+          <span class="button-arrow" aria-hidden="true">→</span>
+        </button>
+      </form>
+      <div class="login-security"><span class="security-dot"></span> Your session is protected with secure sign-in.</div>
+    </div>
+
+    <footer class="login-footer"><span>Northstar IT Service Desk</span><span>Internal workspace</span></footer>
+  </section>
+
+  <aside class="login-aside">
+    <div class="aside-grid"></div>
+    <div class="aside-orbit orbit-one"></div>
+    <div class="aside-orbit orbit-two"></div>
+    <div class="aside-content">
+      <div class="aside-tag"><span class="pulse-dot"></span> ONE PLACE FOR IT OPERATIONS</div>
+      <h2>Less searching.<br /><em>More solving.</em></h2>
+      <p>Bring people, support requests, and equipment into one calm, dependable workspace.</p>
+      <div class="aside-stats">
+        <div><strong>01</strong><span>People and access</span></div>
+        <div><strong>02</strong><span>Service and support</span></div>
+        <div><strong>03</strong><span>Assets and inventory</span></div>
+      </div>
+    </div>
+    <div class="aside-bottom"><span>BUILT FOR THE PEOPLE BEHIND THE SYSTEMS</span><span>v0.1</span></div>
+  </aside>
+</main>

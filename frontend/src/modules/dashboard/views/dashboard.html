@@ -1,0 +1,51 @@
+<section class="page-heading dashboard-heading">
+  <div>
+    <div class="breadcrumb-label">WORKSPACE <span>/</span> OVERVIEW</div>
+    <h1>Good to have you here<span class="heading-period">.</span></h1>
+    <p class="page-intro">A clear starting point for the people and systems you support.</p>
+  </div>
+  <div class="date-chip"><span class="date-chip-dot"></span> SYSTEM STATUS <strong>Operational</strong></div>
+</section>
+
+<section class="welcome-banner">
+  <div class="welcome-copy">
+    <span class="section-kicker light-kicker">YOUR IT OPERATIONS HUB</span>
+    <h2>{{ vm.user.firstName }}, the foundation is ready.</h2>
+    <p>Your identity and access workspace is active. Manage staff and departments from the navigation, then continue with service requests and inventory.</p>
+    <a ng-if="vm.user.permissions.includes('users:read')" class="banner-link" ui-sref="workspace.users">Open people directory <span>→</span></a>
+  </div>
+  <div class="welcome-art" aria-hidden="true">
+    <div class="art-ring ring-a"></div><div class="art-ring ring-b"></div><div class="art-core"><span></span></div>
+    <div class="art-label label-one"><i></i> PEOPLE</div><div class="art-label label-two"><i></i> ACCESS</div><div class="art-label label-three"><i></i> SUPPORT</div>
+  </div>
+  <div class="banner-index">PHASE 01 <span>—</span> IDENTITY</div>
+</section>
+
+<section class="section-title-row">
+  <div><div class="section-kicker">BUILD PROGRESS</div><h2>Workspace foundations</h2></div>
+  <span class="progress-note"><span class="progress-dot"></span> Phase 1 in progress</span>
+</section>
+
+<section class="foundation-grid">
+  <article class="foundation-card" ng-repeat="feature in vm.features track by feature.number">
+    <div class="foundation-top"><span class="foundation-number">{{ feature.number }}</span><span class="foundation-status" ng-class="{'status-ready': feature.status === 'Ready'}"><i></i>{{ feature.status }}</span></div>
+    <div class="foundation-symbol" ng-class="'symbol-' + feature.number">{{ feature.number === '01' ? '◎' : (feature.number === '02' ? '▦' : '↗') }}</div>
+    <h3>{{ feature.title }}</h3>
+    <p>{{ feature.description }}</p>
+  </article>
+</section>
+
+<section class="dashboard-bottom-grid">
+  <article class="info-panel access-panel">
+    <div class="panel-heading"><div><div class="section-kicker">YOUR ACCESS</div><h3>Assigned roles</h3></div><span class="panel-icon">◇</span></div>
+    <div class="role-chip-list"><span class="role-chip" ng-repeat="role in vm.user.roles track by role.id">{{ role.name }}</span></div>
+    <div class="panel-footnote">Permissions are applied to each action and API request.</div>
+  </article>
+  <article class="info-panel department-panel">
+    <div class="panel-heading"><div><div class="section-kicker">TEAM CONTEXT</div><h3>Your department</h3></div><span class="panel-icon">▦</span></div>
+    <div class="department-highlight" ng-if="vm.user.department"><span class="department-code">{{ vm.user.department.code }}</span><div><strong>{{ vm.user.department.name }}</strong><small>Assigned organization unit</small></div></div>
+    <div class="empty-inline" ng-if="!vm.user.department">No department is assigned to your account yet.</div>
+  </article>
+</section>
+
+<footer class="page-footer"><span>NORTHSTAR IT SERVICE DESK</span><span>People first. Systems dependable.</span></footer>

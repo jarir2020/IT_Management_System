@@ -1,0 +1,20 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label">ADMINISTRATION <span>/</span> ROLES & ACCESS</div>
+    <h1>Roles & access<span class="heading-period">.</span></h1>
+    <p class="page-intro">Understand how each role groups permissions across the workspace.</p>
+  </div>
+</section>
+
+<div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+<section class="role-intro-panel"><div class="role-intro-symbol">◇</div><div><span class="section-kicker">ACCESS MODEL</span><h2>One person can hold multiple roles.</h2><p>Permissions from assigned roles are combined. The API checks those permissions on every protected action.</p></div><span class="role-intro-count">{{ vm.roles.length }}<small>BUILT-IN ROLES</small></span></section>
+
+<section class="role-grid">
+  <article class="role-card" ng-repeat="role in vm.roles track by role.id">
+    <div class="role-card-head"><span class="role-card-symbol">{{ role.code === 'ADMIN' ? '✳' : '◇' }}</span><span class="system-role-tag">{{ role.systemRole ? 'BUILT IN' : 'CUSTOM' }}</span></div>
+    <h3>{{ role.name }}</h3>
+    <p>{{ role.description }}</p>
+    <div class="permission-heading"><span>PERMISSIONS</span><span>{{ role.permissions.length }}</span></div>
+    <div class="permission-list"><span ng-repeat="permission in role.permissions track by permission.code"><i></i>{{ permission.description }}</span><span class="permission-empty" ng-if="role.permissions.length === 0">No permissions assigned</span></div>
+  </article>
+</section>

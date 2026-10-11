@@ -1,0 +1,21 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label"><a ui-sref="workspace.tickets">SERVICE DESK</a> <span>/</span> NEW TICKET</div>
+    <h1>Tell us what’s happening<span class="heading-period">.</span></h1>
+    <p class="page-intro">Include the details someone will need to understand and resolve the issue.</p>
+  </div>
+</section>
+
+<div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+<section class="ticket-form-card">
+  <form name="ticketForm" ng-submit="vm.submit(ticketForm)" novalidate>
+    <div class="form-field"><label for="ticket-title">Short summary</label><input id="ticket-title" name="title" ng-model="vm.form.title" maxlength="160" placeholder="e.g. Laptop will not connect to Wi-Fi" required /><div class="field-error" ng-messages="ticketForm.title.$error" ng-if="ticketForm.title.$touched"><span ng-message="required">Enter a short summary.</span></div></div>
+    <div class="form-grid-two">
+      <div class="form-field"><label for="ticket-category">Category</label><select id="ticket-category" ng-model="vm.form.category" ng-options="category.value as category.label for category in vm.categories" required></select></div>
+      <div class="form-field"><label for="ticket-priority">Priority</label><select id="ticket-priority" ng-model="vm.form.priority" ng-options="priority.value as priority.label for priority in vm.priorities" required></select><small class="field-hint">Choose Urgent only when work is fully blocked or a security issue is active.</small></div>
+    </div>
+    <div class="form-field"><label for="ticket-description">What do you need help with?</label><textarea id="ticket-description" name="description" ng-model="vm.form.description" maxlength="10000" rows="8" placeholder="What happened? When did it start? Include any error message or steps that may help." required></textarea><div class="field-error" ng-messages="ticketForm.description.$error" ng-if="ticketForm.description.$touched"><span ng-message="required">Describe the problem.</span></div></div>
+    <div class="ticket-form-footer"><span>After creating the ticket, you can add comments and attachments.</span><div><a class="button button-quiet" ui-sref="workspace.tickets">Cancel</a><button class="button button-primary" type="submit" ng-disabled="ticketForm.$invalid || vm.saving">{{ vm.saving ? 'Creating…' : 'Create ticket' }}</button></div></div>
+  </form>
+</section>

@@ -1,0 +1,13 @@
+import './auth/model.js';
+import './auth/controllers.js';
+import './workspace/controllers.js';
+import './dashboard/controllers.js';
+import './users/model.js';
+import './users/controllers.js';
+import './departments/model.js';
+import './departments/controllers.js';
+import './access/model.js';
+import './access/controllers.js';
+import './tickets/model.js';
+import './tickets/controllers.js';
+import './tickets/file-input.directive.js';

@@ -1,0 +1,54 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label">ADMINISTRATION <span>/</span> PEOPLE</div>
+    <h1>People directory<span class="heading-period">.</span></h1>
+    <p class="page-intro">Manage accounts, departments, and the access people need to do their work.</p>
+  </div>
+  <button class="button button-primary" type="button" ng-click="vm.newUser()"><span class="button-plus">＋</span> Add person</button>
+</section>
+
+<div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+<div class="notice notice-success" ng-if="vm.success" role="status">{{ vm.success }}</div>
+
+<section class="directory-toolbar">
+  <div class="directory-count"><strong>{{ vm.users.length }}</strong><span>accounts</span><span class="count-separator">·</span><span>{{ vm.activeCount() }} active</span></div>
+  <label class="search-box"><span aria-hidden="true">⌕</span><input type="search" ng-model="vm.search" placeholder="Search people or departments" aria-label="Search people or departments" /></label>
+</section>
+
+<section class="table-card">
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead><tr><th>PERSON</th><th>DEPARTMENT</th><th>ROLE ASSIGNMENTS</th><th>ACCOUNT</th><th class="actions-heading">ACTIONS</th></tr></thead>
+      <tbody>
+        <tr ng-if="vm.loading"><td colspan="5" class="table-empty"><span class="loading-indicator"></span> Loading directory…</td></tr>
+        <tr ng-if="!vm.loading && vm.filteredUsers().length === 0"><td colspan="5" class="table-empty">No accounts match your search.</td></tr>
+        <tr ng-repeat="user in vm.filteredUsers() track by user.id">
+          <td><div class="person-cell"><div class="avatar avatar-table">{{ user.firstName[0] }}{{ user.lastName[0] }}</div><div><strong>{{ user.firstName }} {{ user.lastName }}</strong><small>{{ user.email }}</small></div></div></td>
+          <td><span class="department-cell" ng-if="user.department"><span class="department-mini-icon">▦</span>{{ user.department.name }}</span><span class="table-muted" ng-if="!user.department">Unassigned</span></td>
+          <td><div class="table-role-list"><span class="table-role-chip" ng-repeat="role in user.roles track by role.id">{{ role.name }}</span></div></td>
+          <td><span class="account-state" ng-class="user.enabled ? 'account-active' : 'account-inactive'"><i></i>{{ user.enabled ? 'Active' : 'Inactive' }}</span></td>
+          <td class="actions-cell"><button class="text-action" type="button" ng-click="vm.editUser(user)">Edit</button><button class="text-action muted-action" type="button" ng-click="vm.toggleStatus(user)">{{ user.enabled ? 'Deactivate' : 'Reactivate' }}</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-foot"><span>Accounts remain in the directory when deactivated.</span><span>Showing {{ vm.filteredUsers().length }} of {{ vm.users.length }}</span></div>
+</section>
+
+<div class="modal-scrim" ng-if="vm.editorOpen" ng-click="vm.editorOpen = false">
+  <section class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="user-editor-title" ng-click="$event.stopPropagation()">
+    <div class="editor-heading"><div><span class="section-kicker">ACCOUNT SETUP</span><h2 id="user-editor-title">{{ vm.editingId ? 'Edit person' : 'Add a person' }}</h2><p>Set the team details and access roles for this account.</p></div><button class="icon-button close-button" type="button" ng-click="vm.editorOpen = false" aria-label="Close">×</button></div>
+    <div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+    <form name="userForm" ng-submit="vm.saveUser(userForm)" novalidate>
+      <div class="form-grid-two">
+        <div class="form-field"><label for="first-name">First name</label><input id="first-name" name="firstName" ng-model="vm.form.firstName" maxlength="100" required /><div class="field-error" ng-messages="userForm.firstName.$error" ng-if="userForm.firstName.$touched"><span ng-message="required">Enter a first name.</span></div></div>
+        <div class="form-field"><label for="last-name">Last name</label><input id="last-name" name="lastName" ng-model="vm.form.lastName" maxlength="100" required /><div class="field-error" ng-messages="userForm.lastName.$error" ng-if="userForm.lastName.$touched"><span ng-message="required">Enter a last name.</span></div></div>
+      </div>
+      <div class="form-field"><label for="user-email">Work email</label><input id="user-email" name="email" type="email" ng-model="vm.form.email" maxlength="254" placeholder="name@company.com" required /><div class="field-error" ng-messages="userForm.email.$error" ng-if="userForm.email.$touched"><span ng-message="required">Enter an email address.</span><span ng-message="email">Enter a valid email address.</span></div></div>
+      <div class="form-field"><label for="user-password">{{ vm.editingId ? 'New password (optional)' : 'Temporary password' }}</label><input id="user-password" name="password" type="password" ng-model="vm.form.password" minlength="12" ng-required="!vm.editingId" autocomplete="new-password" placeholder="At least 12 characters" /><small class="field-hint">{{ vm.editingId ? 'Leave blank to keep the current password.' : 'The person can change it after signing in.' }}</small><div class="field-error" ng-messages="userForm.password.$error" ng-if="userForm.password.$touched"><span ng-message="required">Set an initial password.</span><span ng-message="minlength">Use at least 12 characters.</span></div></div>
+      <div class="form-field"><label for="user-department">Department</label><select id="user-department" ng-model="vm.form.departmentId" ng-options="department.id as department.name for department in vm.departments | filter:{active:true}"><option value="">No department</option></select></div>
+      <fieldset class="role-fieldset"><legend>Assigned roles <span>Choose one or more</span></legend><div class="role-checkbox-list"><label class="role-checkbox" ng-repeat="role in vm.roles track by role.id"><input type="checkbox" ng-checked="vm.form.roleIds.indexOf(role.id) !== -1" ng-click="vm.toggleRole(role.id)" /><span class="custom-check"></span><span><strong>{{ role.name }}</strong><small>{{ role.description }}</small></span></label></div><div class="field-error" ng-if="vm.form.roleIds.length === 0">Assign at least one role.</div></fieldset>
+      <div class="modal-actions"><button class="button button-quiet" type="button" ng-click="vm.editorOpen = false">Cancel</button><button class="button button-primary" type="submit" ng-disabled="vm.saving || userForm.$invalid || vm.form.roleIds.length === 0">{{ vm.saving ? 'Saving…' : (vm.editingId ? 'Save changes' : 'Create account') }}</button></div>
+    </form>
+  </section>
+</div>

@@ -1,0 +1,41 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label">ADMINISTRATION <span>/</span> DEPARTMENTS</div>
+    <h1>Departments<span class="heading-period">.</span></h1>
+    <p class="page-intro">Keep teams organized so requests, assets, and responsibilities have the right context.</p>
+  </div>
+  <button class="button button-primary" type="button" ng-click="vm.newDepartment()"><span class="button-plus">＋</span> Add department</button>
+</section>
+
+<div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+<div class="notice notice-success" ng-if="vm.success" role="status">{{ vm.success }}</div>
+
+<section class="department-overview">
+  <div class="department-overview-icon">▦</div>
+  <div><span class="section-kicker">ORGANIZATION STRUCTURE</span><h2>{{ vm.departments.length }} department{{ vm.departments.length === 1 ? '' : 's' }} configured</h2><p>Inactive departments remain attached to historical records.</p></div>
+  <div class="department-overview-stat"><strong>{{ vm.activeCount() }}</strong><span>ACTIVE</span></div>
+</section>
+
+<section class="department-grid">
+  <article class="department-card" ng-repeat="department in vm.departments track by department.id" ng-class="{'department-card-inactive': !department.active}">
+    <div class="department-card-top"><span class="department-code-badge">{{ department.code }}</span><span class="account-state" ng-class="department.active ? 'account-active' : 'account-inactive'"><i></i>{{ department.active ? 'Active' : 'Inactive' }}</span></div>
+    <h3>{{ department.name }}</h3>
+    <p>{{ department.description || 'No department description has been added.' }}</p>
+    <div class="department-card-bottom"><span>Created {{ department.createdAt | date:'MMM d, yyyy' }}</span><div><button class="text-action" type="button" ng-click="vm.editDepartment(department)">Edit</button><button ng-if="department.active" class="text-action muted-action" type="button" ng-click="vm.deactivate(department)">Deactivate</button></div></div>
+  </article>
+  <div class="empty-state-card" ng-if="!vm.loading && vm.departments.length === 0"><div class="empty-state-icon">▦</div><strong>No departments yet</strong><p>Add your first department to organize the team.</p><button class="button button-primary" type="button" ng-click="vm.newDepartment()">Add a department</button></div>
+</section>
+
+<div class="modal-scrim" ng-if="vm.editorOpen" ng-click="vm.editorOpen = false">
+  <section class="editor-modal editor-modal-narrow" role="dialog" aria-modal="true" aria-labelledby="department-editor-title" ng-click="$event.stopPropagation()">
+    <div class="editor-heading"><div><span class="section-kicker">ORGANIZATION</span><h2 id="department-editor-title">{{ vm.editingId ? 'Edit department' : 'Add a department' }}</h2><p>Give each department a clear name and short identifier.</p></div><button class="icon-button close-button" type="button" ng-click="vm.editorOpen = false" aria-label="Close">×</button></div>
+    <div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+    <form name="departmentForm" ng-submit="vm.saveDepartment(departmentForm)" novalidate>
+      <div class="form-field"><label for="department-name">Department name</label><input id="department-name" name="name" ng-model="vm.form.name" maxlength="120" placeholder="e.g. Information Technology" required /></div>
+      <div class="form-field"><label for="department-code">Department code</label><input id="department-code" name="code" ng-model="vm.form.code" ng-pattern="/^[A-Za-z0-9_-]{2,32}$/" maxlength="32" placeholder="e.g. IT" required /><small class="field-hint">2–32 letters, numbers, dashes, or underscores.</small><div class="field-error" ng-messages="departmentForm.code.$error" ng-if="departmentForm.code.$touched"><span ng-message="required">Enter a department code.</span><span ng-message="pattern">Use 2–32 letters, numbers, dashes, or underscores.</span></div></div>
+      <div class="form-field"><label for="department-description">Description <span class="optional-label">OPTIONAL</span></label><textarea id="department-description" ng-model="vm.form.description" maxlength="500" rows="3" placeholder="What does this team do?"></textarea></div>
+      <label class="toggle-field"><input type="checkbox" ng-model="vm.form.active" /><span class="toggle-track"></span><span><strong>Department is active</strong><small>Active departments can be assigned to user accounts.</small></span></label>
+      <div class="modal-actions"><button class="button button-quiet" type="button" ng-click="vm.editorOpen = false">Cancel</button><button class="button button-primary" type="submit" ng-disabled="vm.saving || departmentForm.$invalid">{{ vm.saving ? 'Saving…' : (vm.editingId ? 'Save changes' : 'Create department') }}</button></div>
+    </form>
+  </section>
+</div>

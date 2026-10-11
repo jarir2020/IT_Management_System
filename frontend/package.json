@@ -1,0 +1,19 @@
+{
+  "name": "it-service-desk-client",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@uirouter/angularjs": "^1.1.2",
+    "angular": "1.8.3",
+    "angular-messages": "1.8.3"
+  },
+  "devDependencies": {
+    "vite": "^8.3.0"
+  }
+}

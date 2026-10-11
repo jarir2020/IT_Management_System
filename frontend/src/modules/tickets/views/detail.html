@@ -1,0 +1,87 @@
+<div ng-if="vm.loading" class="table-empty ticket-loading"><span class="loading-indicator"></span> Loading ticket…</div>
+<div ng-if="!vm.loading && vm.error && !vm.ticket" class="notice notice-error" role="alert">{{ vm.error }}</div>
+
+<div ng-if="vm.ticket">
+  <section class="page-heading ticket-detail-heading">
+    <div>
+      <div class="breadcrumb-label"><a ui-sref="workspace.tickets">SERVICE DESK</a> <span>/</span> TICKET #{{ vm.ticket.id }}</div>
+      <h1>{{ vm.ticket.title }}<span class="heading-period">.</span></h1>
+      <p class="page-intro">Opened {{ vm.ticket.createdAt | date:'MMM d, yyyy · h:mm a' }} by {{ vm.ticket.requester.firstName }} {{ vm.ticket.requester.lastName }}</p>
+    </div>
+    <div class="ticket-detail-actions">
+      <span class="ticket-status" ng-class="'ticket-status-' + vm.ticket.status.toLowerCase().replace('_', '-')">{{ vm.label(vm.ticket.status) }}</span>
+      <button class="button button-quiet" type="button" ng-if="vm.canManage() && vm.ticket.status === 'OPEN'" ng-click="vm.changeStatus('IN_PROGRESS')">Start work</button>
+      <button class="button button-quiet" type="button" ng-if="vm.canManage() && vm.ticket.status === 'IN_PROGRESS'" ng-click="vm.changeStatus('RESOLVED')">Mark resolved</button>
+      <button class="button button-primary" type="button" ng-if="vm.canClose()" ng-click="vm.changeStatus('CLOSED')">Close ticket</button>
+      <button class="button button-danger-quiet" type="button" ng-if="vm.isAdministrator()" ng-click="vm.deleteTicket()">Delete</button>
+    </div>
+  </section>
+
+  <div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+  <div class="ticket-detail-grid">
+    <div class="ticket-detail-main">
+      <section class="ticket-panel ticket-description-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">REQUEST DETAILS</span><h2>Issue description</h2></div><button class="text-action" type="button" ng-if="vm.canEdit() && !vm.editing" ng-click="vm.editing = true">Edit details</button></div>
+        <div ng-if="!vm.editing" class="ticket-description-text">{{ vm.ticket.description }}</div>
+        <form ng-if="vm.editing" name="editTicketForm" ng-submit="vm.saveDetails(editTicketForm)" novalidate>
+          <div class="form-field"><label for="edit-ticket-title">Short summary</label><input id="edit-ticket-title" name="title" ng-model="vm.editForm.title" maxlength="160" required /></div>
+          <div class="form-grid-two"><div class="form-field"><label for="edit-ticket-category">Category</label><select id="edit-ticket-category" ng-model="vm.editForm.category" ng-options="category.value as category.label for category in vm.categories"></select></div><div class="form-field"><label for="edit-ticket-priority">Priority</label><select id="edit-ticket-priority" ng-model="vm.editForm.priority" ng-options="priority.value as priority.label for priority in vm.priorities"></select></div></div>
+          <div class="form-field"><label for="edit-ticket-description">Description</label><textarea id="edit-ticket-description" name="description" ng-model="vm.editForm.description" maxlength="10000" rows="6" required></textarea></div>
+          <div class="modal-actions"><button class="button button-quiet" type="button" ng-click="vm.editing = false">Cancel</button><button class="button button-primary" type="submit" ng-disabled="editTicketForm.$invalid || vm.saving">{{ vm.saving ? 'Saving…' : 'Save details' }}</button></div>
+        </form>
+      </section>
+
+      <section class="ticket-panel ticket-activity-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">UPDATES</span><h2>Conversation</h2></div><span class="ticket-activity-count">{{ vm.ticket.comments.length }} updates</span></div>
+        <div class="ticket-timeline">
+          <article class="ticket-comment" ng-repeat="comment in vm.ticket.comments track by comment.id" ng-class="{'ticket-comment-internal': comment.internalNote}">
+            <div class="ticket-comment-avatar">{{ comment.author.firstName[0] }}{{ comment.author.lastName[0] }}</div>
+            <div class="ticket-comment-body"><div class="ticket-comment-meta"><strong>{{ comment.author.firstName }} {{ comment.author.lastName }}</strong><span ng-if="comment.internalNote" class="internal-note-label">INTERNAL NOTE</span><time>{{ comment.createdAt | date:'MMM d, yyyy · h:mm a' }}</time></div><p>{{ comment.message }}</p></div>
+          </article>
+          <div class="ticket-empty-activity" ng-if="vm.ticket.comments.length === 0"><span class="ticket-empty-mark">✳</span><strong>No updates yet</strong><p>Add a comment to give the support team more context.</p></div>
+        </div>
+        <form class="ticket-comment-form" name="commentForm" ng-submit="vm.addComment(commentForm)" novalidate>
+          <label class="field-label" for="ticket-comment">Add an update</label>
+          <textarea id="ticket-comment" name="message" ng-model="vm.comment.message" maxlength="10000" rows="4" placeholder="Share a useful update or answer a follow-up question…" required></textarea>
+          <div class="ticket-comment-footer"><label class="internal-note-toggle" ng-if="vm.can('tickets:comment_internal')"><input type="checkbox" ng-model="vm.comment.internalNote" /><span>Internal note for support staff</span></label><button class="button button-primary" type="submit" ng-disabled="commentForm.$invalid || vm.commenting">{{ vm.commenting ? 'Posting…' : 'Post update' }}</button></div>
+        </form>
+      </section>
+    </div>
+
+    <aside class="ticket-detail-aside">
+      <section class="ticket-panel ticket-properties-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">TICKET INFO</span><h2>Properties</h2></div></div>
+        <dl class="ticket-properties-list">
+          <div><dt>Priority</dt><dd><span class="ticket-priority" ng-class="'priority-' + vm.ticket.priority.toLowerCase()"><i></i>{{ vm.label(vm.ticket.priority) }}</span></dd></div>
+          <div><dt>Category</dt><dd>{{ vm.label(vm.ticket.category) }}</dd></div>
+          <div><dt>Requester</dt><dd>{{ vm.ticket.requester.firstName }} {{ vm.ticket.requester.lastName }}<small>{{ vm.ticket.requester.departmentName || vm.ticket.requester.email }}</small></dd></div>
+          <div><dt>Assignee</dt><dd ng-if="vm.ticket.assignee">{{ vm.ticket.assignee.firstName }} {{ vm.ticket.assignee.lastName }}<small>{{ vm.ticket.assignee.email }}</small></dd><dd ng-if="!vm.ticket.assignee" class="table-muted">Unassigned</dd></div>
+          <div><dt>Last updated</dt><dd>{{ vm.ticket.updatedAt | date:'MMM d, yyyy · h:mm a' }}</dd></div>
+        </dl>
+        <form class="ticket-assignment-form" ng-if="vm.can('tickets:assign') && vm.ticket.status !== 'CLOSED'" ng-submit="vm.assign()">
+          <label for="ticket-assignee">Assign to support</label>
+          <select id="ticket-assignee" ng-model="vm.selectedAssigneeId" ng-options="agent.id as (agent.firstName + ' ' + agent.lastName) for agent in vm.agents"><option value="">Unassigned</option></select>
+          <button class="button button-quiet button-full" type="submit" ng-disabled="vm.assigning">{{ vm.assigning ? 'Saving…' : 'Save assignment' }}</button>
+        </form>
+      </section>
+
+      <section class="ticket-panel ticket-attachments-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">FILES</span><h2>Attachments</h2></div><span class="ticket-activity-count">{{ vm.ticket.attachments.length }}</span></div>
+        <div class="ticket-attachment-list">
+          <div class="ticket-attachment" ng-repeat="attachment in vm.ticket.attachments track by attachment.id">
+            <span class="ticket-file-icon">▤</span><div class="ticket-file-meta"><strong>{{ attachment.originalFilename }}</strong><small>{{ attachment.sizeBytes / 1024 | number:0 }} KB · {{ attachment.uploadedBy.firstName }}</small></div>
+            <button type="button" class="icon-button" ng-click="vm.downloadAttachment(attachment)" title="Download {{ attachment.originalFilename }}" aria-label="Download {{ attachment.originalFilename }}">↓</button>
+            <button type="button" class="icon-button attachment-remove" ng-if="vm.isAdministrator() || attachment.uploadedBy.id === vm.user.id || (vm.can('tickets:update') && vm.canManage())" ng-click="vm.deleteAttachment(attachment)" title="Remove attachment" aria-label="Remove attachment">×</button>
+          </div>
+          <div class="ticket-files-empty" ng-if="vm.ticket.attachments.length === 0">No files attached.</div>
+        </div>
+        <form class="ticket-upload-form" ng-if="vm.ticket.status !== 'CLOSED' && (vm.isRequester() || (vm.can('tickets:update') && vm.canManage()))" ng-submit="vm.uploadAttachment()">
+          <label for="ticket-file">Add a file <small>PDF, image, text, spreadsheet, or document · max 10 MB</small></label>
+          <input id="ticket-file" type="file" ticket-file-input accept=".pdf,.png,.jpg,.jpeg,.gif,.txt,.log,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx" />
+          <div class="ticket-upload-submit" ng-if="vm.selectedFile"><span>{{ vm.selectedFile.name }}</span><button class="button button-quiet" type="submit" ng-disabled="vm.uploading">{{ vm.uploading ? 'Uploading…' : 'Upload' }}</button></div>
+        </form>
+      </section>
+    </aside>
+  </div>
+</div>

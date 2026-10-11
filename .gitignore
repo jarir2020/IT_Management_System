@@ -1,0 +1,25 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Build outputs and dependencies
+**/target/
+**/node_modules/
+/frontend/dist/
+/frontend/.vite/
+
+# Runtime uploads and local databases
+/backend/var/uploads/
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs, caches, and editor state
+*.log
+*.swp
+.DS_Store
+.idea/
+.vscode/

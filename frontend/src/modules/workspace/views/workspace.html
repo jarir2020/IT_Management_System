@@ -1,0 +1,54 @@
+<div class="workspace-shell">
+  <aside class="sidebar">
+    <a class="sidebar-brand" ui-sref="workspace.dashboard" aria-label="Northstar IT home">
+      <span class="brand-mark"><span></span><span></span><span></span><span></span></span>
+      <span>Northstar <strong>IT</strong></span>
+    </a>
+
+    <div class="nav-section-label">WORKSPACE</div>
+    <nav class="primary-nav" aria-label="Main navigation">
+      <a ui-sref="workspace.dashboard" ui-sref-active="active" class="nav-link">
+        <span class="nav-glyph">⌂</span><span>Overview</span><span class="nav-arrow">›</span>
+      </a>
+      <a ng-if="vm.can('tickets:read')" ui-sref="workspace.tickets" ui-sref-active="active" class="nav-link">
+        <span class="nav-glyph">◫</span><span>Support tickets</span><span class="nav-arrow">›</span>
+      </a>
+    </nav>
+
+    <div class="nav-section-label nav-section-spaced">ADMINISTRATION</div>
+    <nav class="primary-nav" aria-label="Administration">
+      <a ng-if="vm.can('users:read')" ui-sref="workspace.users" ui-sref-active="active" class="nav-link">
+        <span class="nav-glyph">◉</span><span>People</span><span class="nav-arrow">›</span>
+      </a>
+      <a ng-if="vm.can('departments:read')" ui-sref="workspace.departments" ui-sref-active="active" class="nav-link">
+        <span class="nav-glyph">▦</span><span>Departments</span><span class="nav-arrow">›</span>
+      </a>
+      <a ng-if="vm.can('roles:read')" ui-sref="workspace.roles" ui-sref-active="active" class="nav-link">
+        <span class="nav-glyph">◇</span><span>Roles & access</span><span class="nav-arrow">›</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-status"><span class="status-orb"></span><div><strong>Workspace online</strong><small>Identity services ready</small></div></div>
+    <div class="sidebar-user" ng-if="vm.user">
+      <div class="avatar avatar-small">{{ vm.initials(vm.user) }}</div>
+      <div class="sidebar-user-copy"><strong>{{ vm.user.firstName }} {{ vm.user.lastName }}</strong><small>{{ vm.user.roles[0].name || 'Team member' }}</small></div>
+      <button type="button" class="icon-button user-menu-button" ng-click="vm.logout()" title="Sign out" aria-label="Sign out">↗</button>
+    </div>
+  </aside>
+
+  <main class="workspace-main">
+    <header class="topbar">
+      <div class="topbar-context"><span class="topbar-overline">NORTHSTAR IT</span><span class="topbar-divider">/</span><span>Operations workspace</span></div>
+      <div class="topbar-actions">
+        <span class="topbar-date">IT SERVICE MANAGEMENT</span>
+        <div class="topbar-user" ng-if="vm.user">
+          <div class="avatar">{{ vm.initials(vm.user) }}</div>
+          <div class="topbar-user-copy"><strong>{{ vm.user.firstName }} {{ vm.user.lastName }}</strong><small>{{ vm.user.email }}</small></div>
+        </div>
+        <button type="button" class="button button-quiet topbar-signout" ng-click="vm.logout()">Sign out <span>↗</span></button>
+      </div>
+    </header>
+    <div class="workspace-content" ui-view></div>
+  </main>
+</div>

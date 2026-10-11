@@ -1,0 +1,44 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label">WORKSPACE <span>/</span> SERVICE DESK</div>
+    <h1>Support tickets<span class="heading-period">.</span></h1>
+    <p class="page-intro">Track requests, follow updates, and keep support work moving.</p>
+  </div>
+  <a class="button button-primary" ui-sref="workspace.newTicket"><span class="button-plus">＋</span> New ticket</a>
+</section>
+
+<div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+<section class="directory-toolbar ticket-toolbar">
+  <div class="directory-count"><strong>{{ vm.filteredTickets().length }}</strong><span>tickets</span></div>
+  <label class="search-box"><span aria-hidden="true">⌕</span><input type="search" ng-model="vm.search" placeholder="Search tickets or people" aria-label="Search tickets or people" /></label>
+  <label class="ticket-filter-label" for="ticket-status-filter">Status</label>
+  <select id="ticket-status-filter" class="ticket-status-filter" ng-model="vm.statusFilter">
+    <option value="">All statuses</option>
+    <option value="OPEN">Open</option>
+    <option value="IN_PROGRESS">In progress</option>
+    <option value="RESOLVED">Resolved</option>
+    <option value="CLOSED">Closed</option>
+  </select>
+</section>
+
+<section class="table-card">
+  <div class="table-scroll">
+    <table class="data-table ticket-table">
+      <thead><tr><th>TICKET</th><th>REQUESTER</th><th>ASSIGNED TO</th><th>PRIORITY</th><th>STATUS</th><th>UPDATED</th></tr></thead>
+      <tbody>
+        <tr ng-if="vm.loading"><td colspan="6" class="table-empty"><span class="loading-indicator"></span> Loading tickets…</td></tr>
+        <tr ng-if="!vm.loading && vm.filteredTickets().length === 0"><td colspan="6" class="table-empty">No tickets match your filters.</td></tr>
+        <tr ng-repeat="ticket in vm.filteredTickets() track by ticket.id" class="ticket-row" ui-sref="workspace.ticketDetail({ticketId: ticket.id})">
+          <td><div class="ticket-title-cell"><strong>#{{ ticket.id }} · {{ ticket.title }}</strong><small>{{ vm.label(ticket.category) }}</small></div></td>
+          <td><div class="ticket-person-cell"><strong>{{ ticket.requester.firstName }} {{ ticket.requester.lastName }}</strong><small>{{ ticket.requester.departmentName || ticket.requester.email }}</small></div></td>
+          <td><span class="table-muted" ng-if="!ticket.assignee">Unassigned</span><div class="ticket-person-cell" ng-if="ticket.assignee"><strong>{{ ticket.assignee.firstName }} {{ ticket.assignee.lastName }}</strong><small>{{ ticket.assignee.departmentName || ticket.assignee.email }}</small></div></td>
+          <td><span class="ticket-priority" ng-class="'priority-' + ticket.priority.toLowerCase()"><i></i>{{ vm.label(ticket.priority) }}</span></td>
+          <td><span class="ticket-status" ng-class="'ticket-status-' + ticket.status.toLowerCase().replace('_', '-')">{{ vm.label(ticket.status) }}</span></td>
+          <td><span class="table-muted">{{ ticket.updatedAt | date:'MMM d, yyyy · h:mm a' }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-foot"><span>Employees see their own requests; support staff see the service desk queue.</span><span>{{ vm.tickets.length }} total</span></div>
+</section>

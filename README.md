@@ -48,3 +48,5 @@ Ticket email notifications are disabled until SMTP values are configured in `.en
 ## Module structure
 
 Features keep their own controllers, models, route definitions, and views. Shared application code is limited to cross-feature concerns such as session security and common response mapping. See [the modular MVC guide](docs/MODULAR_MVC.md) for the folder map and request flow.
+
+For a progressive Spring Boot and AngularJS theory guide with Laravel/React comparisons, code snippets, and interview questions, see [the interview theory notes](theoretical-note-for-interview.md).

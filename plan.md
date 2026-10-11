@@ -84,7 +84,8 @@ Use Spring Boot's dependency management for compatible Spring and third-party ve
 | 1. Authentication and administration | Complete | Session login/logout, database-backed roles and permissions, users, and departments. |
 | 2. Ticketing | Complete | Ticket CRUD, support assignment, Open → In Progress → Resolved → Closed workflow, public comments, support-only internal notes, and access-checked private attachments. |
 | 3. Asset management | Complete | Inventory CRUD, assignment and return history, maintenance records, and private purchase/warranty documents. |
-| 4–7. Remaining modules and release work | Planned | Equipment requests and approvals, reports/imports, notifications/chat/SLA/audit, and automated tests/deployment. |
+| 4. Equipment requests and approvals | Complete | Employee requests, department-scoped approval, IT inventory allocation, and procurement when stock is unavailable. |
+| 5–7. Reports, operations, and release work | Planned | Reports/imports, notifications/chat/SLA/audit, and automated tests/deployment. |
 
 Phase 2 uses the module layout below for both Java and AngularJS. Future feature phases should keep their controllers, models, routes, repositories/services where applicable, and views inside their own module directories.
 
@@ -97,6 +98,16 @@ Phase 2 uses the module layout below for both Java and AngularJS. Future feature
 - Record maintenance/repair work with status, dates, notes, and cost; returning an item to service makes it available unless it remains assigned.
 - Store purchase receipts and warranty documents outside the public web root, associate each file with its asset and document type, and check asset access on upload, download, and removal.
 - Add additive Flyway migrations and database-backed permissions for asset read, own-asset read, create/update, assignment, maintenance, document, and delete actions.
+
+### Phase 4 implementation scope
+
+- Let employees request a device by category, item name, and business justification; show their request history and allow cancellation while awaiting approval.
+- Route each request to the requester's department manager. Managers can approve or reject requests from their own department, cannot approve their own request, and must provide a decision note when rejecting. Administrators can review requests across departments.
+- Give IT asset managers a cross-department request queue. They can allocate a matching available asset to the requester or record that stock is unavailable and send the approved request to procurement.
+- Let Procurement/Finance record vendor, purchase reference, cost, expected delivery date, and notes, then mark the purchase received. IT asset managers register received inventory in Assets and allocate it to the request.
+- Keep the request lifecycle explicit (`PENDING_APPROVAL`, `APPROVED`, `REJECTED`, `PENDING_PROCUREMENT`, `PURCHASING`, `READY_FOR_ALLOCATION`, `FULFILLED`, and `CANCELLED`) and retain requester, approver, procurement, allocation, and timestamp details.
+- Associate request-based asset assignments with their equipment request, and use database-backed permissions plus service-level ownership and department checks for every action.
+- Keep the complete request workflow inside backend and AngularJS `requests` modules, each with its own routes, controller, model, and views; document the module in the modular MVC guide.
 
 ## Key design decision
 

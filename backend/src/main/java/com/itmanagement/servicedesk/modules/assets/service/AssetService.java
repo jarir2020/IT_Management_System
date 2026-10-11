@@ -4,6 +4,7 @@ import com.itmanagement.servicedesk.modules.assets.model.Asset;
 import com.itmanagement.servicedesk.modules.assets.model.AssetAssignment;
 import com.itmanagement.servicedesk.modules.assets.model.AssetAssignmentResponse;
 import com.itmanagement.servicedesk.modules.assets.model.AssetAssignmentRequest;
+import com.itmanagement.servicedesk.modules.assets.model.AssetCategory;
 import com.itmanagement.servicedesk.modules.assets.model.AssetDetailResponse;
 import com.itmanagement.servicedesk.modules.assets.model.AssetDocument;
 import com.itmanagement.servicedesk.modules.assets.model.AssetDocumentResponse;
@@ -116,6 +117,25 @@ public class AssetService {
                 .orElseThrow(() -> badRequest("Choose an active user account"));
         asset.assignTo(assignee);
         assignments.save(new AssetAssignment(asset, assignee, actor, clean(request.note())));
+        return toDetail(asset);
+    }
+
+    @Transactional
+    public AssetDetailResponse assignAssetForRequest(Long assetId, Long userId, Long requestId,
+                                                     AssetCategory expectedCategory, String note,
+                                                     UserAccount actor) {
+        Asset asset = findLockedAsset(assetId);
+        if (asset.getStatus() != AssetStatus.AVAILABLE) {
+            throw conflict("Only available assets can be allocated to a request");
+        }
+        if (asset.getCategory() != expectedCategory) {
+            throw conflict("Choose an available asset in the requested category");
+        }
+        UserAccount assignee = users.findDetailedById(userId)
+                .filter(UserAccount::isEnabled)
+                .orElseThrow(() -> badRequest("The requester's account is no longer active"));
+        asset.assignTo(assignee);
+        assignments.save(new AssetAssignment(asset, assignee, actor, clean(note), requestId));
         return toDetail(asset);
     }
 
@@ -241,7 +261,8 @@ public class AssetService {
                 .findAllByAssetIdOrderByAssignedAtDesc(asset.getId()).stream()
                 .map(item -> new AssetAssignmentResponse(item.getId(), toUserSummary(item.getAssignedTo()),
                         toUserSummary(item.getAssignedBy()), toUserSummary(item.getReturnedBy()),
-                        item.getAssignmentNote(), item.getReturnCondition(), item.getAssignedAt(), item.getReturnedAt()))
+                        item.getAssignmentNote(), item.getReturnCondition(), item.getAssignedAt(), item.getReturnedAt(),
+                        item.getEquipmentRequestId()))
                 .toList();
         List<AssetMaintenanceResponse> maintenanceHistory = maintenance
                 .findAllByAssetIdOrderByCreatedAtDesc(asset.getId()).stream()

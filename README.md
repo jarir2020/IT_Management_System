@@ -2,7 +2,7 @@
 
 IT Service Desk and Asset Management application.
 
-The application uses a Spring Boot REST API and an AngularJS single-page application. Authentication, role-based access, user accounts, departments, and the ticketing workflow are implemented.
+The application uses a Spring Boot REST API and an AngularJS single-page application. Authentication, role-based access, user accounts, departments, ticketing, asset inventory, and equipment requests are implemented.
 
 ## Local setup
 
@@ -25,7 +25,11 @@ AngularJS 1.8.3 is end of life. The current dependency tree also reports two adv
 
 ## Current phase
 
-Phases 1–3 are complete: login/logout, database-backed roles and permissions, users and departments, ticket workflows and private attachments, and asset inventory with assignment/return history, maintenance records, and private purchase/warranty documents. Phase 4 will add equipment requests and approvals; reports, chat, notifications, and audit logs follow later.
+Phases 1–4 are complete: login/logout, database-backed roles and permissions, users and departments, ticket workflows and private attachments, asset inventory and maintenance, and equipment requests with department approval, IT allocation, and procurement tracking. Reports/imports, chat, notifications, SLAs, audit logs, and release automation follow in later phases.
+
+## Equipment requests
+
+Employees submit requests for an equipment category with a business justification. Department managers review requests from their own department and cannot approve their own requests. IT asset managers allocate matching available inventory or route approved requests to Procurement/Finance. Procurement records vendor, reference, cost, and expected delivery, then marks orders received; IT registers the delivered asset in Inventory and completes allocation. Request-linked assignments appear in asset history.
 
 ## Module structure
 

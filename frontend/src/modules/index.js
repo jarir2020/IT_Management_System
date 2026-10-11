@@ -14,3 +14,5 @@ import './tickets/file-input.directive.js';
 import './assets/model.js';
 import './assets/controllers.js';
 import './assets/file-input.directive.js';
+import './requests/model.js';
+import './requests/controllers.js';

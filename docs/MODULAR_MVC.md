@@ -14,6 +14,7 @@ modules/
 ├── access/{controller,model,routes,repository,service}/
 ├── tickets/{controller,model,routes,repository,service}/
 ├── assets/{controller,model,routes,repository,service}/
+├── requests/{controller,model,routes,repository,service}/
 └── shared/
 ```
 
@@ -24,7 +25,7 @@ modules/
 - `service/` holds domain rules and coordinates persistence and other module dependencies.
 - `shared/` is for code that is genuinely used across feature boundaries.
 
-For example, Tickets owns `TicketController`, `TicketService`, ticket entities and DTOs, ticket repositories, and `TicketRoutes`. Assets owns its inventory, assignment, maintenance, and document records. Both modules reference shared user accounts while enforcing their own access rules.
+For example, Tickets owns `TicketController`, `TicketService`, ticket entities and DTOs, ticket repositories, and `TicketRoutes`. Assets owns its inventory, assignment, maintenance, and document records. Requests owns the equipment request state machine, approval and procurement actions, and the link from an allocation to its source request. Both modules reference shared user accounts while enforcing their own access rules.
 
 ## AngularJS modules
 
@@ -38,6 +39,7 @@ modules/
 ├── access/{controllers.js,model.js,routes.js,views/}
 ├── tickets/{controllers.js,model.js,routes.js,views/}
 ├── assets/{controllers.js,model.js,routes.js,views/}
+├── requests/{controllers.js,model.js,routes.js,views/}
 ├── workspace/{controllers.js,routes.js,views/}
 ├── dashboard/{controllers.js,routes.js,views/}
 ├── registry.js
@@ -68,3 +70,5 @@ Feature view
 For a ticket attachment or asset document, that feature's AngularJS model sends multipart form data to its Spring controller. The module service checks record access, stores a private file, and records its metadata. Downloads pass through the same access check; stored files are never exposed as static web content.
 
 The Assets API is rooted at `/api/v1/assets`. Its controller exposes inventory list/detail/create/update, assignment and return, maintenance start/status changes, document upload/download/removal, and retirement. Employees receive only assets currently assigned to their account; asset managers and administrators can inspect the inventory. Retired records remain available in history.
+
+The Equipment Requests API is rooted at `/api/v1/requests`. It supports submission and requester cancellation, department-scoped approval/rejection, stock-unavailable routing, purchase recording, receipt, and inventory allocation. A request-based assignment is stored in the asset assignment history with its equipment request ID.

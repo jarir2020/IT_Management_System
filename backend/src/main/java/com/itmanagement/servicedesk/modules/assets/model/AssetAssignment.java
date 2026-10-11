@@ -36,6 +36,9 @@ public class AssetAssignment {
     @JoinColumn(name = "returned_by")
     private UserAccount returnedBy;
 
+    @Column(name = "equipment_request_id")
+    private Long equipmentRequestId;
+
     @Column(name = "assignment_note", length = 1000)
     private String assignmentNote;
 
@@ -52,10 +55,16 @@ public class AssetAssignment {
     }
 
     public AssetAssignment(Asset asset, UserAccount assignedTo, UserAccount assignedBy, String assignmentNote) {
+        this(asset, assignedTo, assignedBy, assignmentNote, null);
+    }
+
+    public AssetAssignment(Asset asset, UserAccount assignedTo, UserAccount assignedBy,
+                           String assignmentNote, Long equipmentRequestId) {
         this.asset = asset;
         this.assignedTo = assignedTo;
         this.assignedBy = assignedBy;
         this.assignmentNote = assignmentNote;
+        this.equipmentRequestId = equipmentRequestId;
     }
 
     public void markReturned(UserAccount actor, String returnCondition) {
@@ -72,6 +81,7 @@ public class AssetAssignment {
     public UserAccount getAssignedTo() { return assignedTo; }
     public UserAccount getAssignedBy() { return assignedBy; }
     public UserAccount getReturnedBy() { return returnedBy; }
+    public Long getEquipmentRequestId() { return equipmentRequestId; }
     public String getAssignmentNote() { return assignmentNote; }
     public String getReturnCondition() { return returnCondition; }
     public Instant getAssignedAt() { return assignedAt; }

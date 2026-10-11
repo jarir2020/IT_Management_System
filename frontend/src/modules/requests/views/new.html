@@ -1,0 +1,20 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label"><a ui-sref="workspace.requests">EQUIPMENT</a> <span>/</span> NEW REQUEST</div>
+    <h1>Request equipment<span class="heading-period">.</span></h1>
+    <p class="page-intro">Tell your department manager what you need and why it supports your work.</p>
+  </div>
+</section>
+
+<div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+<section class="ticket-form-card request-form-card">
+  <form name="requestForm" ng-submit="vm.submit(requestForm)" novalidate>
+    <div class="form-grid-two">
+      <div class="form-field"><label for="request-category">Equipment category</label><select id="request-category" ng-model="vm.form.category" ng-options="category.value as category.label for category in vm.categories" required></select></div>
+      <div class="form-field"><label for="request-item-name">Item requested</label><input id="request-item-name" name="itemName" ng-model="vm.form.itemName" maxlength="140" placeholder="e.g. 14-inch business laptop" required /><div class="field-error" ng-messages="requestForm.itemName.$error" ng-if="requestForm.itemName.$touched"><span ng-message="required">Enter the item you need.</span></div></div>
+    </div>
+    <div class="form-field"><label for="request-justification">Business justification</label><textarea id="request-justification" name="justification" ng-model="vm.form.justification" maxlength="5000" rows="7" placeholder="Explain what work this equipment will support and any relevant requirements." required></textarea><div class="field-error" ng-messages="requestForm.justification.$error" ng-if="requestForm.justification.$touched"><span ng-message="required">Add a short justification.</span></div></div>
+    <div class="ticket-form-footer"><span>Your department manager will review this request first.</span><div><a class="button button-quiet" ui-sref="workspace.requests">Cancel</a><button class="button button-primary" type="submit" ng-disabled="requestForm.$invalid || vm.saving">{{ vm.saving ? 'Submitting…' : 'Submit request' }}</button></div></div>
+  </form>
+</section>

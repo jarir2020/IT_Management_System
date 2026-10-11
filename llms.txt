@@ -17,4 +17,6 @@
 
 ## Current implementation
 
-Phases 1–3 cover authentication, access control, users, departments, ticket workflows, and asset inventory with assignments, returns, maintenance, and private documents. The next phase is equipment requests and approvals.
+Phases 1–4 cover authentication, access control, users, departments, ticket workflows, asset inventory with assignments/returns/maintenance/private documents, and equipment requests with department approval, inventory allocation, and procurement tracking.
+
+The requests API is rooted at `/api/v1/requests`. Department managers are limited to requests submitted by members of their department and cannot review their own requests. Asset managers allocate available matching inventory or route approved requests to procurement. Procurement records purchases and delivery; asset managers register received equipment in Inventory and allocate it. Request-linked asset assignments retain the originating request ID.

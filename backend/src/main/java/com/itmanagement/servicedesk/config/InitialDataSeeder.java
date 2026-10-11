@@ -47,11 +47,19 @@ public class InitialDataSeeder implements ApplicationRunner {
             Map.entry("assets:assign", "Assign and return assets"),
             Map.entry("assets:maintenance", "Record asset repairs and maintenance"),
             Map.entry("assets:document", "Upload and remove asset documents"),
-            Map.entry("assets:delete", "Retire assets from active inventory"));
+            Map.entry("assets:delete", "Retire assets from active inventory"),
+            Map.entry("requests:read_own", "View equipment requests created by the account"),
+            Map.entry("requests:create", "Submit equipment requests"),
+            Map.entry("requests:cancel", "Cancel pending equipment requests created by the account"),
+            Map.entry("requests:approve_department", "Review requests submitted by the account's department"),
+            Map.entry("requests:approve_all", "Review equipment requests across all departments"),
+            Map.entry("requests:read_all", "View the complete equipment request queue"),
+            Map.entry("requests:allocate", "Allocate inventory and route unavailable requests to procurement"),
+            Map.entry("requests:procure", "Record purchase details and receive ordered equipment"));
 
     private static final Set<String> REQUESTER_PERMISSIONS = Set.of(
             "departments:read", "tickets:read", "tickets:create", "tickets:comment", "tickets:attach",
-            "assets:read_own");
+            "assets:read_own", "requests:read_own", "requests:create", "requests:cancel");
 
     private static final Set<String> SUPPORT_PERMISSIONS = Set.of(
             "departments:read", "tickets:read", "tickets:read_all", "tickets:create", "tickets:update",
@@ -59,15 +67,22 @@ public class InitialDataSeeder implements ApplicationRunner {
 
     private static final Set<String> ASSET_MANAGER_PERMISSIONS = Set.of(
             "departments:read", "assets:read", "assets:read_own", "assets:create", "assets:update",
-            "assets:assign", "assets:maintenance", "assets:document", "assets:delete");
+            "assets:assign", "assets:maintenance", "assets:document", "assets:delete",
+            "requests:read_own", "requests:read_all", "requests:allocate");
+
+    private static final Set<String> DEPARTMENT_MANAGER_PERMISSIONS = withPermissions(
+            REQUESTER_PERMISSIONS, "requests:approve_department");
+
+    private static final Set<String> PROCUREMENT_PERMISSIONS = withPermissions(
+            REQUESTER_PERMISSIONS, "requests:read_all", "requests:procure");
 
     private static final Map<String, RoleDefinition> ROLES = Map.of(
             "ADMIN", new RoleDefinition("Administrator", "Manage users, access, and system settings", Set.copyOf(PERMISSIONS.keySet())),
             "EMPLOYEE", new RoleDefinition("Employee", "Create tickets and request equipment", REQUESTER_PERMISSIONS),
             "SUPPORT_AGENT", new RoleDefinition("Support Agent", "Handle support tickets", SUPPORT_PERMISSIONS),
             "IT_ASSET_MANAGER", new RoleDefinition("IT Asset Manager", "Manage inventory, assignments, and maintenance", ASSET_MANAGER_PERMISSIONS),
-            "DEPARTMENT_MANAGER", new RoleDefinition("Department Manager", "Review department equipment requests", REQUESTER_PERMISSIONS),
-            "PROCUREMENT_FINANCE", new RoleDefinition("Procurement/Finance", "Manage purchasing and expenses", REQUESTER_PERMISSIONS));
+            "DEPARTMENT_MANAGER", new RoleDefinition("Department Manager", "Review department equipment requests", DEPARTMENT_MANAGER_PERMISSIONS),
+            "PROCUREMENT_FINANCE", new RoleDefinition("Procurement/Finance", "Manage purchasing and expenses", PROCUREMENT_PERMISSIONS));
 
     private final PermissionRepository permissions;
     private final RoleRepository roles;
@@ -139,5 +154,11 @@ public class InitialDataSeeder implements ApplicationRunner {
     }
 
     private record RoleDefinition(String name, String description, Set<String> permissions) {
+    }
+
+    private static Set<String> withPermissions(Set<String> base, String... additional) {
+        Set<String> combined = new LinkedHashSet<>(base);
+        combined.addAll(Set.of(additional));
+        return Set.copyOf(combined);
     }
 }

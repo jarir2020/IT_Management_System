@@ -1,0 +1,111 @@
+<div ng-if="vm.loading" class="table-empty ticket-loading"><span class="loading-indicator"></span> Loading request…</div>
+<div ng-if="!vm.loading && vm.error && !vm.request" class="notice notice-error" role="alert">{{ vm.error }}</div>
+
+<div ng-if="vm.request">
+  <section class="page-heading ticket-detail-heading">
+    <div>
+      <div class="breadcrumb-label"><a ui-sref="workspace.requests">EQUIPMENT</a> <span>/</span> REQUEST #{{ vm.request.id }}</div>
+      <h1>{{ vm.request.itemName }}<span class="heading-period">.</span></h1>
+      <p class="page-intro">Submitted {{ vm.request.createdAt | date:'MMM d, yyyy · h:mm a' }} by {{ vm.request.requester.firstName }} {{ vm.request.requester.lastName }}</p>
+    </div>
+    <div class="ticket-detail-actions">
+      <span class="request-status" ng-class="'request-status-' + vm.request.status.toLowerCase().replaceAll('_', '-')">{{ vm.label(vm.request.status) }}</span>
+      <button class="button button-danger-quiet" type="button" ng-if="vm.isOwner() && vm.can('requests:cancel') && vm.request.status === 'PENDING_APPROVAL'" ng-click="vm.cancel()" ng-disabled="vm.working">Cancel request</button>
+    </div>
+  </section>
+
+  <div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+  <div class="ticket-detail-grid request-detail-grid">
+    <div class="ticket-detail-main">
+      <section class="ticket-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">REQUEST DETAILS</span><h2>Business need</h2></div></div>
+        <div class="ticket-description-text">{{ vm.request.justification }}</div>
+      </section>
+
+      <section class="ticket-panel" ng-if="vm.request.status !== 'PENDING_APPROVAL' && vm.request.status !== 'CANCELLED'">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">APPROVAL</span><h2>Department decision</h2></div></div>
+        <dl class="ticket-properties-list">
+          <div><dt>Decision</dt><dd>{{ vm.request.status === 'REJECTED' ? 'Rejected' : 'Approved' }}</dd></div>
+          <div><dt>Reviewed by</dt><dd>{{ vm.request.reviewedBy.firstName }} {{ vm.request.reviewedBy.lastName }}<small>{{ vm.request.decidedAt | date:'MMM d, yyyy · h:mm a' }}</small></dd></div>
+          <div ng-if="vm.request.decisionNote"><dt>Note</dt><dd>{{ vm.request.decisionNote }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="ticket-panel" ng-if="vm.request.procurementVendor || vm.request.procurementNotes || vm.request.receivedAt">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">PROCUREMENT</span><h2>Purchase details</h2></div></div>
+        <dl class="ticket-properties-list">
+          <div ng-if="vm.request.procurementVendor"><dt>Vendor</dt><dd>{{ vm.request.procurementVendor }}</dd></div>
+          <div ng-if="vm.request.purchaseReference"><dt>Reference</dt><dd>{{ vm.request.purchaseReference }}</dd></div>
+          <div ng-if="vm.request.purchaseCost != null"><dt>Cost</dt><dd>{{ vm.request.purchaseCost | currency }}</dd></div>
+          <div ng-if="vm.request.expectedDeliveryDate"><dt>Expected</dt><dd>{{ vm.request.expectedDeliveryDate | date:'MMM d, yyyy' }}</dd></div>
+          <div ng-if="vm.request.receivedAt"><dt>Received</dt><dd>{{ vm.request.receivedAt | date:'MMM d, yyyy · h:mm a' }}</dd></div>
+          <div ng-if="vm.request.procurementNotes"><dt>Notes</dt><dd>{{ vm.request.procurementNotes }}</dd></div>
+          <div ng-if="vm.request.procurementUpdatedBy"><dt>Updated by</dt><dd>{{ vm.request.procurementUpdatedBy.firstName }} {{ vm.request.procurementUpdatedBy.lastName }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="ticket-panel" ng-if="vm.request.status === 'FULFILLED'">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">ALLOCATION</span><h2>Equipment assigned</h2></div><a class="text-action" ui-sref="workspace.assetDetail({assetId: vm.request.allocatedAssetId})">View asset</a></div>
+        <p class="ticket-description-text">Asset record #{{ vm.request.allocatedAssetId }} was assigned to {{ vm.request.requester.firstName }} {{ vm.request.requester.lastName }} on {{ vm.request.fulfilledAt | date:'MMM d, yyyy · h:mm a' }}.</p>
+      </section>
+    </div>
+
+    <aside class="ticket-detail-aside request-detail-aside">
+      <section class="ticket-panel ticket-properties-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">REQUEST INFO</span><h2>Properties</h2></div></div>
+        <dl class="ticket-properties-list">
+          <div><dt>Category</dt><dd>{{ vm.label(vm.request.category) }}</dd></div>
+          <div><dt>Requester</dt><dd>{{ vm.request.requester.firstName }} {{ vm.request.requester.lastName }}<small>{{ vm.request.requester.email }}</small></dd></div>
+          <div><dt>Department</dt><dd>{{ vm.request.departmentName || 'No department' }}</dd></div>
+          <div><dt>Submitted</dt><dd>{{ vm.request.createdAt | date:'MMM d, yyyy' }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="ticket-panel request-action-panel" ng-if="vm.canReview()">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">MANAGER ACTION</span><h2>Review request</h2></div></div>
+        <form class="ticket-assignment-form" name="decisionForm" novalidate>
+          <label for="decision-note">Decision note <span ng-if="vm.request.status === 'PENDING_APPROVAL'">(required to reject)</span></label>
+          <textarea id="decision-note" name="decisionNote" ng-model="vm.decisionNote" maxlength="2000" rows="3" placeholder="Optional context for the requester"></textarea>
+          <button class="button button-primary button-full" type="button" ng-click="vm.approve()" ng-disabled="vm.working">Approve</button>
+          <button class="button button-danger-quiet button-full" type="button" ng-click="vm.reject(decisionForm)" ng-disabled="vm.working || !vm.decisionNote.trim()">Reject</button>
+        </form>
+      </section>
+
+      <section class="ticket-panel request-action-panel" ng-if="vm.canAllocate()">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">IT ASSET MANAGER</span><h2>Allocate inventory</h2></div></div>
+        <form class="ticket-assignment-form" ng-submit="vm.allocate()">
+          <label for="request-asset">Available {{ vm.label(vm.request.category) }}</label>
+          <select id="request-asset" ng-model="vm.selectedAssetId" ng-options="asset.id as (asset.assetTag + ' · ' + asset.name) for asset in vm.assets"><option value="">Select matching asset</option></select>
+          <textarea ng-model="vm.allocationNote" maxlength="1000" rows="2" placeholder="Assignment note (optional)"></textarea>
+          <button class="button button-primary button-full" type="submit" ng-disabled="vm.working || !vm.selectedAssetId">Allocate to requester</button>
+        </form>
+        <form class="ticket-assignment-form request-action-divider" name="stockForm" ng-if="vm.request.status === 'APPROVED'" ng-submit="vm.sendToProcurement(stockForm)" novalidate>
+          <label for="stock-reason">No suitable stock?</label>
+          <textarea id="stock-reason" name="stockReason" ng-model="vm.stockReason" maxlength="2000" rows="3" placeholder="Record why this item needs to be purchased" required></textarea>
+          <button class="button button-quiet button-full" type="submit" ng-disabled="stockForm.$invalid || vm.working">Send to procurement</button>
+        </form>
+      </section>
+
+      <section class="ticket-panel request-action-panel" ng-if="vm.can('requests:procure') && vm.request.status === 'PENDING_PROCUREMENT'">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">PROCUREMENT</span><h2>Record purchase</h2></div></div>
+        <form class="ticket-assignment-form" name="purchaseForm" ng-submit="vm.recordPurchase(purchaseForm)" novalidate>
+          <label for="purchase-vendor">Vendor</label><input id="purchase-vendor" name="vendor" ng-model="vm.purchase.vendor" maxlength="100" required />
+          <label for="purchase-reference">Purchase reference</label><input id="purchase-reference" ng-model="vm.purchase.purchaseReference" maxlength="100" />
+          <label for="purchase-cost">Cost</label><input id="purchase-cost" name="cost" type="number" min="0" step="0.01" ng-model="vm.purchase.cost" required />
+          <label for="expected-delivery">Expected delivery</label><input id="expected-delivery" name="expectedDeliveryDate" type="date" ng-model="vm.purchase.expectedDeliveryDate" required />
+          <label for="purchase-notes">Notes</label><textarea id="purchase-notes" ng-model="vm.purchase.notes" maxlength="2000" rows="2"></textarea>
+          <button class="button button-primary button-full" type="submit" ng-disabled="purchaseForm.$invalid || vm.working">Record purchase</button>
+        </form>
+      </section>
+
+      <section class="ticket-panel request-action-panel" ng-if="vm.can('requests:procure') && vm.request.status === 'PURCHASING'">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">PROCUREMENT</span><h2>Confirm delivery</h2></div></div>
+        <form class="ticket-assignment-form" ng-submit="vm.markReceived()">
+          <label for="received-note">Receipt note <span>(optional)</span></label><textarea id="received-note" ng-model="vm.procurementNote" maxlength="2000" rows="3"></textarea>
+          <button class="button button-primary button-full" type="submit" ng-disabled="vm.working">Mark received</button>
+        </form>
+      </section>
+    </aside>
+  </div>
+</div>

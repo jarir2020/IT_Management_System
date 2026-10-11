@@ -508,6 +508,22 @@ ng-cloak, [ng-cloak] { display: none !important; }
 .asset-status-under-maintenance, .asset-status-in-progress { border-color: #e8d9bb; color: #9a753d; background: #fbf7ed; }
 .asset-status-retired, .asset-status-completed { border-color: #e2e6e9; color: #7a858c; background: #f3f5f6; }
 .asset-status-cancelled { border-color: #efd5d3; color: #b3625e; background: #fff6f5; }
+.request-row { cursor: pointer; transition: background .14s; }
+.request-row:hover { background: #f8fbfc; }
+.request-status { display: inline-flex; align-items: center; min-height: 22px; padding: 3px 8px; border: 1px solid #e4e9ec; border-radius: 20px; color: #788894; background: #f7f9fa; font-size: 8px; font-weight: 600; white-space: nowrap; }
+.request-status-pending-approval, .request-status-pending-procurement { border-color: #e8d9bb; color: #9a753d; background: #fbf7ed; }
+.request-status-approved, .request-status-ready-for-allocation { border-color: #d6e5ee; color: #4f829e; background: #f0f7fa; }
+.request-status-purchasing { border-color: #d8d7ed; color: #726a9e; background: #f5f4fb; }
+.request-status-fulfilled { border-color: #c9e6dc; color: #3e8b78; background: #eff8f4; }
+.request-status-rejected, .request-status-cancelled { border-color: #efd5d3; color: #b3625e; background: #fff6f5; }
+.request-form-card { max-width: 760px; }
+.request-action-divider { padding-top: 14px; border-top: 1px solid #edf1f3; }
+.request-action-panel .button-danger-quiet { min-height: 36px; }
+.request-action-panel .ticket-assignment-form input:not([type="checkbox"]) { width: 100%; min-height: 36px; padding: 8px; border: 1px solid #dfe6eb; border-radius: 5px; color: #53677a; font: inherit; font-size: 9px; }
+.request-action-panel .ticket-assignment-form textarea { min-height: 64px; }
+.request-action-panel .ticket-assignment-form input:focus, .request-action-panel .ticket-assignment-form textarea:focus, .request-action-panel .ticket-assignment-form select:focus { border-color: #58b4a9; outline: 0; }
+.request-detail-aside .ticket-panel { padding: 17px; }
+.request-detail-aside .ticket-assignment-form { gap: 9px; }
 .asset-form-card { max-width: 900px; padding: 23px; border: 1px solid #e6ecef; border-radius: 9px; background: #fff; }
 .asset-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .asset-form-grid .form-field { min-width: 0; }

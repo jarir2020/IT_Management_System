@@ -16,6 +16,9 @@
       <a ng-if="vm.can('assets:read_own')" ui-sref="workspace.assets" ui-sref-active="active" class="nav-link">
         <span class="nav-glyph">▣</span><span>Assets</span><span class="nav-arrow">›</span>
       </a>
+      <a ng-if="vm.can('requests:read_own')" ui-sref="workspace.requests" ui-sref-active="active" class="nav-link">
+        <span class="nav-glyph">◇</span><span>Equipment requests</span><span class="nav-arrow">›</span>
+      </a>
     </nav>
 
     <div class="nav-section-label nav-section-spaced">ADMINISTRATION</div>

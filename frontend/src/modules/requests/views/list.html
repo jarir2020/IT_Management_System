@@ -1,0 +1,47 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label">WORKSPACE <span>/</span> EQUIPMENT</div>
+    <h1>Equipment requests<span class="heading-period">.</span></h1>
+    <p class="page-intro">Follow approvals, purchasing, and allocation from one request record.</p>
+  </div>
+  <a class="button button-primary" ng-if="vm.can('requests:create')" ui-sref="workspace.newRequest"><span class="button-plus">＋</span> New request</a>
+</section>
+
+<div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+<section class="directory-toolbar ticket-toolbar">
+  <div class="directory-count"><strong>{{ vm.filteredRequests().length }}</strong><span>requests</span></div>
+  <label class="search-box"><span aria-hidden="true">⌕</span><input type="search" ng-model="vm.search" placeholder="Search request or employee" aria-label="Search request or employee" /></label>
+  <label class="ticket-filter-label" for="request-status-filter">Status</label>
+  <select id="request-status-filter" class="ticket-status-filter" ng-model="vm.statusFilter">
+    <option value="">All statuses</option>
+    <option value="PENDING_APPROVAL">Pending approval</option>
+    <option value="APPROVED">Approved</option>
+    <option value="REJECTED">Rejected</option>
+    <option value="PENDING_PROCUREMENT">Pending procurement</option>
+    <option value="PURCHASING">Purchasing</option>
+    <option value="READY_FOR_ALLOCATION">Ready for allocation</option>
+    <option value="FULFILLED">Fulfilled</option>
+    <option value="CANCELLED">Cancelled</option>
+  </select>
+</section>
+
+<section class="table-card">
+  <div class="table-scroll">
+    <table class="data-table request-table">
+      <thead><tr><th>REQUEST</th><th>REQUESTER</th><th>DEPARTMENT</th><th>STATUS</th><th>UPDATED</th></tr></thead>
+      <tbody>
+        <tr ng-if="vm.loading"><td colspan="5" class="table-empty"><span class="loading-indicator"></span> Loading requests…</td></tr>
+        <tr ng-if="!vm.loading && vm.filteredRequests().length === 0"><td colspan="5" class="table-empty">No equipment requests match your filters.</td></tr>
+        <tr ng-repeat="request in vm.filteredRequests() track by request.id" class="request-row" ui-sref="workspace.requestDetail({requestId: request.id})">
+          <td><div class="ticket-title-cell"><strong>#{{ request.id }} · {{ request.itemName }}</strong><small>{{ vm.label(request.category) }}</small></div></td>
+          <td><div class="ticket-person-cell"><strong>{{ request.requester.firstName }} {{ request.requester.lastName }}</strong><small>{{ request.requester.email }}</small></div></td>
+          <td><span class="table-muted">{{ request.departmentName || 'No department' }}</span></td>
+          <td><span class="request-status" ng-class="'request-status-' + request.status.toLowerCase().replaceAll('_', '-')">{{ vm.label(request.status) }}</span></td>
+          <td><span class="table-muted">{{ request.updatedAt | date:'MMM d, yyyy · h:mm a' }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-foot"><span>Department managers review their department; IT and Procurement see the full queue.</span><span>{{ vm.requests.length }} total</span></div>
+</section>

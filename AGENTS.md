@@ -32,7 +32,14 @@ cp .env.example .env    # replace the example database and administrator passwor
 # browse http://127.0.0.1:5173
 ```
 
-To stop MySQL while retaining its data, run `docker compose stop mysql`. Build the backend with `cd backend && mvn -DskipTests package` and the frontend with `cd frontend && npm run build`. Automated tests are a later roadmap phase; do not describe a build as a test run.
+Run backend unit and integration tests with `cd backend && mvn test`. MySQL-backed integration tests use Testcontainers and are skipped when Docker is unavailable; CI runs them with Docker. Build the backend with `cd backend && mvn -DskipTests package` and the frontend with `cd frontend && npm run build`. To stop local MySQL while retaining its data, run `docker compose stop mysql`.
+
+## Production setup
+
+- Follow `docs/DEPLOYMENT.md` and use `compose.production.yaml` with a private `.env.production` file.
+- The production frontend container serves the AngularJS bundle and proxies `/api`, `/ws`, and `/healthz` to the API on a private Docker network.
+- Put the published frontend port behind an HTTPS ingress, configure its public origin in `PUBLIC_APP_ORIGIN`, and preserve WebSocket upgrade headers.
+- Database and upload volumes must be backed up together. Never commit production environment files or backup archives.
 
 ## Repository hygiene
 

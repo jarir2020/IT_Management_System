@@ -8,6 +8,7 @@
 - [plan.md](plan.md): feature roadmap, technology decisions, and modular MVC architecture.
 - [AGENTS.md](AGENTS.md): repository conventions and implementation workflow.
 - [docs/MODULAR_MVC.md](docs/MODULAR_MVC.md): backend/frontend module layout and request flow.
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): tests, production containers, HTTPS ingress, health checks, backups, and releases.
 
 ## Source map
 
@@ -17,10 +18,12 @@
 
 ## Current implementation
 
-Phases 1–6 cover authentication and access control, users and departments, ticket workflows, asset inventory, equipment requests and approvals, role-scoped reports and workbook imports, configurable ticket email notifications, persisted live chat, priority-based SLAs, and an administrator audit trail. Phase 7 adds automated tests and production packaging.
+Phases 1–7 are complete. The application includes authentication and access control, users and departments, ticket workflows, asset inventory, equipment requests and approvals, role-scoped reports and workbook imports, configurable ticket email notifications, persisted live chat, priority-based SLAs, an administrator audit trail, unit and MySQL Testcontainers integration tests, CI, production Docker images, and a same-origin Nginx reverse proxy.
 
 The requests API is rooted at `/api/v1/requests`. Department managers are limited to requests submitted by members of their department and cannot review their own requests. Asset managers allocate available matching inventory or route approved requests to procurement. Procurement records purchases and delivery; asset managers register received equipment in Inventory and allocate it. Request-linked asset assignments retain the originating request ID.
 
 The reports API is rooted at `/api/v1/reports`. It exports accessible asset, ticket, and equipment request datasets as PDF and Excel, builds a role-filtered ZIP bundle, and imports `.xlsx` asset rows with validation results. Start local development with `./start-backend.sh` and `./start-frontend.sh`; browse at `http://127.0.0.1:5173`.
 
 Ticket chat uses authenticated STOMP over WebSocket at `/ws`, with persisted history and ticket-level authorization. Configure SMTP through `.env`; email notifications are disabled by default. Priority-based SLA targets and administrator audit events are documented in `docs/OPERATIONS.md`.
+
+Run backend verification with `cd backend && mvn test`; Docker-backed integration checks run when a Docker daemon is available. Production setup uses `docker compose --env-file .env.production -f compose.production.yaml up --build -d` and requires an HTTPS ingress whose public origin matches `PUBLIC_APP_ORIGIN`.

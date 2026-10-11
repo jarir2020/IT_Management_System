@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 *.pem
 *.key
 
@@ -13,6 +14,7 @@
 
 # Runtime uploads and local databases
 **/var/uploads/
+backups/
 *.sqlite
 *.sqlite3
 *.db

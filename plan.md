@@ -87,7 +87,7 @@ Use Spring Boot's dependency management for compatible Spring and third-party ve
 | 4. Equipment requests and approvals | Complete | Employee requests, department-scoped approval, IT inventory allocation, and procurement when stock is unavailable. |
 | 5. Reports and data exchange | Complete | Role-scoped PDF/Excel reports, asset workbook import, maintenance expense totals, straight-line depreciation, and permission-scoped ZIP bundles. |
 | 6. Operations | Complete | Configurable ticket email notifications, persisted live ticket chat, priority-based SLA tracking, and an administrator audit trail. |
-| 7. Quality and release | In Progress | Automated tests, production container packaging, reverse proxy configuration, and deployment documentation. |
+| 7. Quality and release | Complete | Unit tests for SLA, ticket permissions/workflow, and reports/imports; MySQL Testcontainers migration and audit-permission integration checks; GitHub Actions CI; backend/frontend production images; private-network Compose with Nginx API/WebSocket proxy and persistent MySQL/upload volumes; deployment, health, backup/restore, secrets, and release guide. |
 
 Phase 2 uses the module layout below for both Java and AngularJS. Future feature phases should keep their controllers, models, routes, repositories/services where applicable, and views inside their own module directories.
 

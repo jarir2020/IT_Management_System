@@ -2,7 +2,7 @@
 
 IT Service Desk and Asset Management application.
 
-The application uses a Spring Boot REST API and an AngularJS single-page application. Authentication, role-based access, user accounts, departments, ticketing, asset inventory, and equipment requests are implemented.
+The application uses a Spring Boot REST API and an AngularJS single-page application. Authentication, role-based access, user accounts, departments, ticketing, asset inventory, equipment requests, reports, and operational workflows are implemented.
 
 ## Local setup
 
@@ -19,13 +19,19 @@ Ticket attachments and asset documents are stored outside the web root in `backe
 
 The Vite development server proxies `/api` requests to the backend, so session cookies and CSRF requests remain same-origin in development. For production, put the frontend and API behind one HTTPS origin and set `SESSION_COOKIE_SECURE=true`.
 
+## Tests and production deployment
+
+Run backend unit and integration tests with `cd backend && mvn test`. MySQL integration tests use Testcontainers when Docker is available. Build the frontend with `cd frontend && npm ci && npm run build`.
+
+Production Dockerfiles and a private-network deployment Compose file are provided. Copy `.env.production.example` to `.env.production`, replace its placeholders, and follow [the deployment guide](docs/DEPLOYMENT.md) for HTTPS ingress, health checks, backups, restores, and release steps. MySQL and uploaded files use named volumes and are not exposed as host ports.
+
 ## Frontend security note
 
 AngularJS 1.8.3 is end of life. The current dependency tree also reports two advisories with `npm audit`; review them before exposing a production build publicly. Keep application templates in source control and never compile user-provided content as an AngularJS template. A future phase should evaluate a supported migration or a security-maintained replacement.
 
 ## Current phase
 
-Phases 1–6 are complete: login/logout, database-backed roles and permissions, users and departments, ticket workflows and private attachments, asset inventory and maintenance, equipment requests with department approval and procurement tracking, role-scoped reports and imports, email notifications, persisted live ticket chat, priority-based SLAs, and an administrator audit trail. Phase 7 adds automated tests and production packaging.
+Phases 1–7 are complete: login/logout, database-backed roles and permissions, users and departments, ticket workflows and private attachments, asset inventory and maintenance, equipment requests with department approval and procurement tracking, role-scoped reports and imports, email notifications, persisted live ticket chat, priority-based SLAs, an administrator audit trail, automated unit and MySQL integration tests, CI, production containers, a same-origin reverse proxy, and deployment documentation.
 
 ## Equipment requests
 

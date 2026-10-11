@@ -35,6 +35,9 @@
       <a ng-if="vm.can('roles:read')" ui-sref="workspace.roles" ui-sref-active="active" class="nav-link">
         <span class="nav-glyph">◇</span><span>Roles & access</span><span class="nav-arrow">›</span>
       </a>
+      <a ng-if="vm.can('audit:read')" ui-sref="workspace.audit" ui-sref-active="active" class="nav-link">
+        <span class="nav-glyph">≋</span><span>Audit trail</span><span class="nav-arrow">›</span>
+      </a>
     </nav>
 
     <div class="sidebar-spacer"></div>

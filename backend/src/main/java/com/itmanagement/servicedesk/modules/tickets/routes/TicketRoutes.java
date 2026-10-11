@@ -8,6 +8,7 @@ public final class TicketRoutes {
     public static final String STATUS = BY_ID + "/status";
     public static final String ASSIGNEE = BY_ID + "/assignee";
     public static final String COMMENTS = BY_ID + "/comments";
+    public static final String CHAT = BY_ID + "/chat";
     public static final String ATTACHMENTS = BY_ID + "/attachments";
     public static final String ATTACHMENT_DOWNLOAD = ATTACHMENTS + "/{attachmentId}/download";
     public static final String ATTACHMENT_BY_ID = ATTACHMENTS + "/{attachmentId}";

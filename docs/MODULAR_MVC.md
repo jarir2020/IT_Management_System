@@ -16,6 +16,7 @@ modules/
 ├── assets/{controller,model,routes,repository,service}/
 ├── requests/{controller,model,routes,repository,service}/
 ├── reports/{controller,model,routes,service}/
+├── audit/{controller,model,routes,repository,service}/
 └── shared/
 ```
 
@@ -42,6 +43,7 @@ modules/
 ├── assets/{controllers.js,model.js,routes.js,views/}
 ├── requests/{controllers.js,model.js,routes.js,views/}
 ├── reports/{controllers.js,model.js,routes.js,views/}
+├── audit/{controllers.js,model.js,routes.js,views/}
 ├── workspace/{controllers.js,routes.js,views/}
 ├── dashboard/{controllers.js,routes.js,views/}
 ├── registry.js
@@ -76,3 +78,5 @@ The Assets API is rooted at `/api/v1/assets`. Its controller exposes inventory l
 The Equipment Requests API is rooted at `/api/v1/requests`. It supports submission and requester cancellation, department-scoped approval/rejection, stock-unavailable routing, purchase recording, receipt, and inventory allocation. A request-based assignment is stored in the asset assignment history with its equipment request ID.
 
 Reports and Imports owns `/api/v1/reports`, PDF/Excel generation, ZIP bundles, and workbook parsing. Its service reads feature repositories for report data and delegates imported inventory rows to the Assets service so duplicate and normalization rules stay in one place.
+
+Ticket chat messages, REST history, and the STOMP/WebSocket handler stay inside Tickets. The message interceptor checks the signed-in account against the ticket before allowing either a chat subscription or send. Audit owns append-only event persistence and its administrator-only read screen; feature services record successful lifecycle actions without copying message contents into the audit log.

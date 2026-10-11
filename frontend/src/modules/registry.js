@@ -11,5 +11,6 @@ export const featureModules = {
   tickets: angular.module('itDesk.tickets', []),
   assets: angular.module('itDesk.assets', []),
   requests: angular.module('itDesk.requests', []),
-  reports: angular.module('itDesk.reports', [])
+  reports: angular.module('itDesk.reports', []),
+  audit: angular.module('itDesk.audit', [])
 };

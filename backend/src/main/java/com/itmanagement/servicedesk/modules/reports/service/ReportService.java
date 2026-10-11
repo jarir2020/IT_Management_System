@@ -173,7 +173,7 @@ public class ReportService {
         }
     }
 
-    public AssetImportResult importAssets(MultipartFile file) {
+    public AssetImportResult importAssets(MultipartFile file, UserAccount actor) {
         if (file == null || file.isEmpty()) throw badRequest("Choose an .xlsx workbook to import");
         if (file.getSize() > MAX_IMPORT_BYTES) throw badRequest("The import workbook cannot exceed 10 MB");
         String filename = file.getOriginalFilename();
@@ -208,7 +208,7 @@ public class ReportService {
                                 .sorted().distinct().reduce((left, right) -> left + "; " + right).orElse("Invalid asset row");
                         throw new IllegalArgumentException(message);
                     }
-                    assetService.createImportedAsset(request);
+                    assetService.createImportedAsset(request, actor);
                     imported++;
                 } catch (IllegalArgumentException | ResponseStatusException exception) {
                     String message = exception instanceof ResponseStatusException response

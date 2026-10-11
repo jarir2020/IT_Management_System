@@ -445,6 +445,28 @@ ng-cloak, [ng-cloak] { display: none !important; }
 .ticket-comment-form > textarea { width: 100%; padding: 10px; border: 1px solid #dfe6eb; border-radius: 6px; color: #53677a; font: inherit; font-size: 9px; line-height: 1.55; resize: vertical; }
 .ticket-comment-form > textarea:focus { border-color: #58b4a9; outline: 0; }
 .ticket-comment-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ticket-sla-strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 18px; }
+.ticket-sla-strip > div { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; padding: 12px 15px; border: 1px solid #e6ecef; border-radius: 8px; background: #fff; }
+.ticket-sla-strip span, .ticket-sla-strip small { color: #82919b; font-size: 9px; }
+.ticket-sla-strip strong { color: #438c7f; font-size: 9px; }
+.ticket-sla-strip small { grid-column: 1 / -1; }
+.sla-breached { color: #bf5d52 !important; }
+.sla-list-indicator { color: #438c7f; font-size: 8px; font-weight: 700; white-space: nowrap; }
+.ticket-chat-panel { display: grid; gap: 12px; }
+.chat-connection { padding: 4px 8px; border-radius: 12px; color: #8c969b; background: #f2f4f4; font-size: 8px; }
+.chat-connected { color: #347a6e; background: #e7f5f0; }
+.ticket-chat-feed { display: grid; align-content: start; gap: 8px; max-height: 320px; overflow: auto; padding: 10px; border: 1px solid #edf1f3; border-radius: 7px; background: #fafcfc; }
+.ticket-chat-message { max-width: 88%; padding: 9px 11px; border: 1px solid #e6ecef; border-radius: 8px 8px 8px 2px; background: #fff; }
+.ticket-chat-own { justify-self: end; border-color: #d2ebe4; border-radius: 8px 8px 2px 8px; background: #eef8f5; }
+.ticket-chat-message > div { display: flex; align-items: center; gap: 12px; }
+.ticket-chat-message strong { color: #506778; font-size: 8px; }
+.ticket-chat-message time { color: #97a4aa; font-size: 7px; }
+.ticket-chat-message p { margin: 5px 0 0; color: #586d7a; font-size: 9px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ticket-chat-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.ticket-chat-form input { min-width: 0; padding: 10px; border: 1px solid #dfe6eb; border-radius: 6px; color: #53677a; font: inherit; font-size: 9px; }
+.ticket-chat-form input:focus { border-color: #58b4a9; outline: 0; }
+.audit-table td { vertical-align: top; }
+.audit-action { color: #397f73; font-size: 8px; font-weight: 700; white-space: nowrap; }
 .internal-note-toggle { display: inline-flex; align-items: center; gap: 6px; color: #8a7a60; font-size: 8px; }
 .internal-note-toggle input { accent-color: #b9823e; }
 .ticket-attachment-list { display: grid; gap: 6px; }
@@ -492,6 +514,8 @@ ng-cloak, [ng-cloak] { display: none !important; }
   .ticket-form-footer { align-items: flex-start; flex-direction: column; }
   .ticket-form-footer > div { align-self: flex-end; }
   .ticket-comment-meta time { margin-left: 0; }
+  .ticket-sla-strip { grid-template-columns: 1fr; }
+  .ticket-chat-message { max-width: 96%; }
 }
 
 /* Asset Management module */

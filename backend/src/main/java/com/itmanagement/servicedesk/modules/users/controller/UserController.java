@@ -37,8 +37,9 @@ public class UserController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('users:write')")
-    public UserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
-        return users.createUser(request);
+    public UserResponse createUser(@Valid @RequestBody CreateUserRequest request,
+                                   @AuthenticationPrincipal UserAccount actor) {
+        return users.createUser(request, actor);
     }
 
     @PutMapping(UserRoutes.BY_ID)
@@ -46,7 +47,7 @@ public class UserController {
     public UserResponse updateUser(@PathVariable Long id,
                                    @Valid @RequestBody UpdateUserRequest request,
                                    @AuthenticationPrincipal UserAccount actor) {
-        return users.updateUser(id, request, actor.getId());
+        return users.updateUser(id, request, actor);
     }
 
     @PatchMapping(UserRoutes.STATUS)
@@ -54,6 +55,6 @@ public class UserController {
     public UserResponse setEnabled(@PathVariable Long id,
                                    @RequestBody UserStatusRequest request,
                                    @AuthenticationPrincipal UserAccount actor) {
-        return users.setEnabled(id, request.enabled(), actor.getId());
+        return users.setEnabled(id, request.enabled(), actor);
     }
 }

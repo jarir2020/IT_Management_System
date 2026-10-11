@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(AuthRoutes.BASE_PATH + AuthRoutes.CSRF,
                                 AuthRoutes.BASE_PATH + AuthRoutes.LOGIN).permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/**", "/ws", "/ws/**").authenticated()
                         .anyRequest().permitAll())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, exception) -> {

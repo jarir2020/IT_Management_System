@@ -1,5 +1,6 @@
 package com.itmanagement.servicedesk.modules.tickets.service;
 
+import com.itmanagement.servicedesk.modules.audit.service.AuditService;
 import com.itmanagement.servicedesk.modules.tickets.model.Ticket;
 import com.itmanagement.servicedesk.modules.tickets.model.TicketAttachment;
 import com.itmanagement.servicedesk.modules.tickets.model.TicketAttachmentResponse;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -38,17 +40,26 @@ public class TicketService {
     private final TicketAttachmentRepository attachments;
     private final UserAccountRepository users;
     private final TicketFileStorage fileStorage;
+    private final AuditService audit;
+    private final TicketSlaCalculator slaCalculator;
+    private final ObjectProvider<TicketEmailNotificationService> emailNotifications;
 
     public TicketService(TicketRepository tickets,
                          TicketCommentRepository comments,
                          TicketAttachmentRepository attachments,
                          UserAccountRepository users,
-                         TicketFileStorage fileStorage) {
+                         TicketFileStorage fileStorage,
+                         AuditService audit,
+                         TicketSlaCalculator slaCalculator,
+                         ObjectProvider<TicketEmailNotificationService> emailNotifications) {
         this.tickets = tickets;
         this.comments = comments;
         this.attachments = attachments;
         this.users = users;
         this.fileStorage = fileStorage;
+        this.audit = audit;
+        this.slaCalculator = slaCalculator;
+        this.emailNotifications = emailNotifications;
     }
 
     @Transactional(readOnly = true)
@@ -69,6 +80,9 @@ public class TicketService {
         Ticket ticket = new Ticket(actor, request.title().trim(), request.description().trim(),
                 request.category(), request.priority());
         Ticket saved = tickets.save(ticket);
+        audit.record(actor, "TICKET_CREATED", "TICKET", saved.getId(), "Created a support ticket");
+        afterCommit(() -> emailNotifications.ifAvailable(mail ->
+                mail.ticketCreated(saved.getId(), saved.getTitle(), actor.getEmail())));
         return toDetail(saved, actor);
     }
 
@@ -92,6 +106,7 @@ public class TicketService {
 
         ticket.updateDetails(request.title().trim(), request.description().trim(),
                 request.category(), request.priority());
+        audit.record(actor, "TICKET_UPDATED", "TICKET", ticket.getId(), "Updated ticket details");
         return toDetail(ticket, actor);
     }
 
@@ -103,12 +118,21 @@ public class TicketService {
             throw conflict("Closed tickets cannot be reassigned");
         }
 
+        UserAccount oldAssignee = ticket.getAssignee();
         UserAccount assignee = request.userId() == null ? null : users.findDetailedById(request.userId())
                 .orElseThrow(() -> badRequest("The selected support account does not exist"));
         if (assignee != null && (!assignee.isEnabled() || !isSupportAccount(assignee))) {
             throw badRequest("Tickets can only be assigned to an active support agent or administrator");
         }
         ticket.assignTo(assignee);
+        if (oldAssignee == null ? assignee != null : !oldAssignee.getId().equals(assignee == null ? null : assignee.getId())) {
+            audit.record(actor, "TICKET_ASSIGNED", "TICKET", ticket.getId(),
+                    assignee == null ? "Removed ticket assignment" : "Assigned ticket to support staff");
+            if (assignee != null) {
+                afterCommit(() -> emailNotifications.ifAvailable(mail ->
+                        mail.ticketAssigned(ticket.getId(), ticket.getTitle(), assignee.getEmail())));
+            }
+        }
         return toDetail(ticket, actor);
     }
 
@@ -130,7 +154,13 @@ public class TicketService {
             }
         }
 
+        TicketStatus previousStatus = ticket.getStatus();
         ticket.changeStatus(nextStatus);
+        audit.record(actor, "TICKET_STATUS_CHANGED", "TICKET", ticket.getId(),
+                "Changed ticket status from " + previousStatus + " to " + nextStatus);
+        afterCommit(() -> emailNotifications.ifAvailable(mail ->
+                mail.ticketStatusChanged(ticket.getId(), ticket.getTitle(), nextStatus.name(),
+                        ticket.getRequester().getEmail())));
         return toDetail(ticket, actor);
     }
 
@@ -141,6 +171,19 @@ public class TicketService {
             throw forbidden("Only support staff can add internal notes");
         }
         comments.save(new TicketComment(ticket, actor, request.message().trim(), request.internalNote()));
+        boolean requesterComment = ticket.getRequester().getId().equals(actor.getId());
+        if (!request.internalNote() && !requesterComment && hasAuthority(actor, "tickets:read_all")) {
+            ticket.markFirstResponse(java.time.Instant.now());
+        }
+        audit.record(actor, request.internalNote() ? "TICKET_INTERNAL_NOTE_ADDED" : "TICKET_COMMENT_ADDED",
+                "TICKET", ticket.getId(), request.internalNote() ? "Added an internal ticket note" : "Added a public ticket update");
+        if (!request.internalNote()) {
+            UserAccount recipient = requesterComment ? ticket.getAssignee() : ticket.getRequester();
+            if (recipient != null) {
+                afterCommit(() -> emailNotifications.ifAvailable(mail ->
+                        mail.ticketCommented(ticket.getId(), ticket.getTitle(), recipient.getEmail())));
+            }
+        }
         return toDetail(ticket, actor);
     }
 
@@ -197,6 +240,7 @@ public class TicketService {
                 .orElseThrow(() -> notFound("Ticket not found"));
         attachments.findAllByTicketIdOrderByUploadedAtAsc(ticket.getId())
                 .forEach(attachment -> deleteStoredFileAfterCommit(attachment.getStorageKey()));
+        audit.record(actor, "TICKET_DELETED", "TICKET", ticket.getId(), "Deleted a support ticket");
         tickets.delete(ticket);
     }
 
@@ -208,6 +252,11 @@ public class TicketService {
             throw notFound("Ticket not found");
         }
         return ticket;
+    }
+
+    @Transactional(readOnly = true)
+    public void assertCanReadTicket(Long ticketId, UserAccount actor) {
+        findReadableTicket(ticketId, actor);
     }
 
     private void requireCanManage(Ticket ticket, UserAccount actor) {
@@ -239,7 +288,7 @@ public class TicketService {
     private TicketSummary toSummary(Ticket ticket) {
         return new TicketSummary(ticket.getId(), ticket.getTitle(), ticket.getCategory(), ticket.getPriority(),
                 ticket.getStatus(), toUserSummary(ticket.getRequester()), toUserSummary(ticket.getAssignee()),
-                ticket.getCreatedAt(), ticket.getUpdatedAt());
+                ticket.getCreatedAt(), ticket.getUpdatedAt(), slaCalculator.summarize(ticket));
     }
 
     private TicketDetailResponse toDetail(Ticket ticket, UserAccount viewer) {
@@ -260,7 +309,7 @@ public class TicketService {
                 ticket.getCategory(), ticket.getPriority(), ticket.getStatus(),
                 toUserSummary(ticket.getRequester()), toUserSummary(ticket.getAssignee()),
                 ticket.getCreatedAt(), ticket.getUpdatedAt(), ticket.getResolvedAt(), ticket.getClosedAt(),
-                visibleComments, ticketAttachments);
+                slaCalculator.summarize(ticket), visibleComments, ticketAttachments);
     }
 
     private static TicketUserSummary toUserSummary(UserAccount user) {
@@ -291,6 +340,17 @@ public class TicketService {
             public void afterCommit() {
                 fileStorage.deleteQuietly(storageKey);
             }
+        });
+    }
+
+    private static void afterCommit(Runnable action) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            action.run();
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() { action.run(); }
         });
     }
 

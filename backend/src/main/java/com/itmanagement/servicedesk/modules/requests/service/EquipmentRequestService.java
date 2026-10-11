@@ -1,5 +1,6 @@
 package com.itmanagement.servicedesk.modules.requests.service;
 
+import com.itmanagement.servicedesk.modules.audit.service.AuditService;
 import com.itmanagement.servicedesk.modules.assets.model.AssetDetailResponse;
 import com.itmanagement.servicedesk.modules.assets.service.AssetService;
 import com.itmanagement.servicedesk.modules.requests.model.EquipmentRequest;
@@ -22,10 +23,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class EquipmentRequestService {
     private final EquipmentRequestRepository requests;
     private final AssetService assets;
+    private final AuditService audit;
 
-    public EquipmentRequestService(EquipmentRequestRepository requests, AssetService assets) {
+    public EquipmentRequestService(EquipmentRequestRepository requests, AssetService assets, AuditService audit) {
         this.requests = requests;
         this.assets = assets;
+        this.audit = audit;
     }
 
     @Transactional(readOnly = true)
@@ -52,7 +55,9 @@ public class EquipmentRequestService {
         requireAuthority(actor, "requests:create");
         EquipmentRequest request = new EquipmentRequest(actor, actor.getDepartment(), input.category(),
                 input.itemName().trim(), input.justification().trim());
-        return toResponse(requests.save(request));
+        EquipmentRequest saved = requests.save(request);
+        audit.record(actor, "REQUEST_CREATED", "EQUIPMENT_REQUEST", saved.getId(), "Submitted an equipment request");
+        return toResponse(saved);
     }
 
     @Transactional
@@ -62,6 +67,7 @@ public class EquipmentRequestService {
         ensureNotOwnRequest(request, actor);
         requireStatus(request, EquipmentRequestStatus.PENDING_APPROVAL);
         request.approve(actor, clean(input == null ? null : input.note()));
+        audit.record(actor, "REQUEST_APPROVED", "EQUIPMENT_REQUEST", request.getId(), "Approved an equipment request");
         return toResponse(request);
     }
 
@@ -72,6 +78,7 @@ public class EquipmentRequestService {
         ensureNotOwnRequest(request, actor);
         requireStatus(request, EquipmentRequestStatus.PENDING_APPROVAL);
         request.reject(actor, clean(input.note()));
+        audit.record(actor, "REQUEST_REJECTED", "EQUIPMENT_REQUEST", request.getId(), "Rejected an equipment request");
         return toResponse(request);
     }
 
@@ -82,6 +89,8 @@ public class EquipmentRequestService {
         EquipmentRequest request = findLocked(requestId);
         requireStatus(request, EquipmentRequestStatus.APPROVED);
         request.sendToProcurement(actor, input.note().trim());
+        audit.record(actor, "REQUEST_SENT_TO_PROCUREMENT", "EQUIPMENT_REQUEST", request.getId(),
+                "Sent an equipment request to procurement");
         return toResponse(request);
     }
 
@@ -93,6 +102,8 @@ public class EquipmentRequestService {
         requireStatus(request, EquipmentRequestStatus.PENDING_PROCUREMENT);
         request.recordPurchase(actor, input.vendor().trim(), clean(input.purchaseReference()), input.cost(),
                 input.expectedDeliveryDate(), clean(input.notes()));
+        audit.record(actor, "REQUEST_PURCHASE_RECORDED", "EQUIPMENT_REQUEST", request.getId(),
+                "Recorded procurement details for an equipment request");
         return toResponse(request);
     }
 
@@ -102,6 +113,8 @@ public class EquipmentRequestService {
         EquipmentRequest request = findLocked(requestId);
         requireStatus(request, EquipmentRequestStatus.PURCHASING);
         request.markReceived(actor, input == null ? null : clean(input.note()));
+        audit.record(actor, "REQUEST_RECEIVED", "EQUIPMENT_REQUEST", request.getId(),
+                "Marked an equipment order as received");
         return toResponse(request);
     }
 
@@ -116,6 +129,8 @@ public class EquipmentRequestService {
         AssetDetailResponse allocation = assets.assignAssetForRequest(assetId, request.getRequester().getId(),
                 request.getId(), request.getCategory(), clean(note), actor);
         request.fulfill(allocation.id());
+        audit.record(actor, "REQUEST_ALLOCATED", "EQUIPMENT_REQUEST", request.getId(),
+                "Allocated inventory to an equipment request");
         return toResponse(request);
     }
 
@@ -128,6 +143,7 @@ public class EquipmentRequestService {
         }
         requireStatus(request, EquipmentRequestStatus.PENDING_APPROVAL);
         request.cancel();
+        audit.record(actor, "REQUEST_CANCELLED", "EQUIPMENT_REQUEST", request.getId(), "Cancelled an equipment request");
         return toResponse(request);
     }
 

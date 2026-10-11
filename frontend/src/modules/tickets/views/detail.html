@@ -19,6 +19,11 @@
 
   <div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
 
+  <section class="ticket-sla-strip" aria-label="Service level targets">
+    <div><span>First response</span><strong ng-class="{'sla-breached': vm.ticket.sla.firstResponseBreached}">{{ vm.ticket.sla.firstResponseBreached ? 'Breached' : (vm.ticket.sla.firstRespondedAt ? 'Responded' : 'Due') }}</strong><small>Target {{ vm.ticket.sla.responseTargetMinutes }} min · {{ vm.ticket.sla.firstResponseDueAt | date:'MMM d, h:mm a' }}</small></div>
+    <div><span>Resolution</span><strong ng-class="{'sla-breached': vm.ticket.sla.resolutionBreached}">{{ vm.ticket.sla.resolutionBreached ? 'Breached' : (vm.ticket.resolvedAt ? 'Met' : 'Due') }}</strong><small>Target {{ vm.ticket.sla.resolutionTargetMinutes / 60 | number:0 }} hr · {{ vm.ticket.sla.resolutionDueAt | date:'MMM d, h:mm a' }}</small></div>
+  </section>
+
   <div class="ticket-detail-grid">
     <div class="ticket-detail-main">
       <section class="ticket-panel ticket-description-panel">
@@ -46,6 +51,22 @@
           <textarea id="ticket-comment" name="message" ng-model="vm.comment.message" maxlength="10000" rows="4" placeholder="Share a useful update or answer a follow-up question…" required></textarea>
           <div class="ticket-comment-footer"><label class="internal-note-toggle" ng-if="vm.can('tickets:comment_internal')"><input type="checkbox" ng-model="vm.comment.internalNote" /><span>Internal note for support staff</span></label><button class="button button-primary" type="submit" ng-disabled="commentForm.$invalid || vm.commenting">{{ vm.commenting ? 'Posting…' : 'Post update' }}</button></div>
         </form>
+      </section>
+
+      <section class="ticket-panel ticket-chat-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">LIVE SUPPORT</span><h2>Ticket chat</h2></div><span class="chat-connection" ng-class="{'chat-connected': vm.chatConnected}">{{ vm.chatConnected ? 'Live' : 'Connecting' }}</span></div>
+        <p class="table-muted" ng-if="vm.chatError" role="status">{{ vm.chatError }}</p>
+        <div class="ticket-chat-feed" aria-live="polite">
+          <article class="ticket-chat-message" ng-repeat="message in vm.chatMessages track by message.id" ng-class="{'ticket-chat-own': message.sender.id === vm.user.id}">
+            <div><strong>{{ message.sender.firstName }} {{ message.sender.lastName }}</strong><time>{{ message.createdAt | date:'MMM d, h:mm a' }}</time></div><p>{{ message.message }}</p>
+          </article>
+          <div class="ticket-empty-activity" ng-if="!vm.chatMessages.length"><strong>No chat messages yet</strong><p>Use chat for quick coordination. Keep formal updates in the conversation above.</p></div>
+        </div>
+        <form class="ticket-chat-form" name="chatForm" ng-submit="vm.sendChat(chatForm)">
+          <input name="message" ng-model="vm.chatDraft" maxlength="4000" placeholder="Write a quick message…" aria-label="Ticket chat message" required ng-disabled="vm.ticket.status === 'CLOSED'" />
+          <button class="button button-primary" type="submit" ng-disabled="!vm.chatConnected || chatForm.$invalid || vm.ticket.status === 'CLOSED'">Send</button>
+        </form>
+        <small class="table-muted" ng-if="vm.ticket.status === 'CLOSED'">Chat is read-only for closed tickets.</small>
       </section>
     </div>
 

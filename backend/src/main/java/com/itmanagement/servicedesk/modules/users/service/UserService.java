@@ -1,5 +1,6 @@
 package com.itmanagement.servicedesk.modules.users.service;
 
+import com.itmanagement.servicedesk.modules.audit.service.AuditService;
 import com.itmanagement.servicedesk.modules.shared.ApiMapper;
 import com.itmanagement.servicedesk.modules.users.model.CreateUserRequest;
 import com.itmanagement.servicedesk.modules.users.model.UpdateUserRequest;
@@ -26,15 +27,18 @@ public class UserService {
     private final DepartmentRepository departments;
     private final RoleRepository roles;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService audit;
 
     public UserService(UserAccountRepository users,
                        DepartmentRepository departments,
                        RoleRepository roles,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       AuditService audit) {
         this.users = users;
         this.departments = departments;
         this.roles = roles;
         this.passwordEncoder = passwordEncoder;
+        this.audit = audit;
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +47,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse createUser(CreateUserRequest request) {
+    public UserResponse createUser(CreateUserRequest request, UserAccount actor) {
         String email = normalizeEmail(request.email());
         ensureEmailAvailable(email, null);
         Department department = resolveDepartment(request.departmentId());
@@ -56,12 +60,15 @@ public class UserService {
                 true,
                 department,
                 assignedRoles);
-        return ApiMapper.toUser(users.save(user));
+        UserAccount saved = users.save(user);
+        audit.record(actor, "USER_CREATED", "USER", saved.getId(), "Created a user account");
+        return ApiMapper.toUser(saved);
     }
 
     @Transactional
-    public UserResponse updateUser(Long id, UpdateUserRequest request, Long actorId) {
+    public UserResponse updateUser(Long id, UpdateUserRequest request, UserAccount actor) {
         UserAccount user = getUser(id);
+        Long actorId = actor.getId();
         String email = normalizeEmail(request.email());
         ensureEmailAvailable(email, id);
         Department department = resolveDepartment(request.departmentId());
@@ -88,17 +95,24 @@ public class UserService {
             }
             user.setPasswordHash(passwordEncoder.encode(request.password()));
         }
+        audit.record(actor, "USER_UPDATED", "USER", user.getId(), "Updated a user account");
         return ApiMapper.toUser(user);
     }
 
     @Transactional
-    public UserResponse setEnabled(Long id, boolean enabled, Long actorId) {
+    public UserResponse setEnabled(Long id, boolean enabled, UserAccount actor) {
         UserAccount user = getUser(id);
+        Long actorId = actor.getId();
         if (!enabled && id.equals(actorId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You cannot deactivate your own account");
         }
         guardLastAdministrator(user, enabled, user.getRoles());
+        boolean previousEnabled = user.getEnabled();
         user.setEnabled(enabled);
+        if (previousEnabled != enabled) {
+            audit.record(actor, enabled ? "USER_ENABLED" : "USER_DISABLED", "USER", user.getId(),
+                    enabled ? "Enabled a user account" : "Disabled a user account");
+        }
         return ApiMapper.toUser(user);
     }
 

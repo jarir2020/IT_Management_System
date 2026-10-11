@@ -86,8 +86,8 @@ Use Spring Boot's dependency management for compatible Spring and third-party ve
 | 3. Asset management | Complete | Inventory CRUD, assignment and return history, maintenance records, and private purchase/warranty documents. |
 | 4. Equipment requests and approvals | Complete | Employee requests, department-scoped approval, IT inventory allocation, and procurement when stock is unavailable. |
 | 5. Reports and data exchange | Complete | Role-scoped PDF/Excel reports, asset workbook import, maintenance expense totals, straight-line depreciation, and permission-scoped ZIP bundles. |
-| 6. Operations | Planned | Email, live chat, SLA calculations, and audit logs. |
-| 7. Quality and release | Planned | Automated tests, deployment configuration, and deployment documentation. |
+| 6. Operations | Complete | Configurable ticket email notifications, persisted live ticket chat, priority-based SLA tracking, and an administrator audit trail. |
+| 7. Quality and release | In Progress | Automated tests, production container packaging, reverse proxy configuration, and deployment documentation. |
 
 Phase 2 uses the module layout below for both Java and AngularJS. Future feature phases should keep their controllers, models, routes, repositories/services where applicable, and views inside their own module directories.
 
@@ -119,6 +119,20 @@ Phase 2 uses the module layout below for both Java and AngularJS. Future feature
 - Route imported assets through the Assets module service so bulk import uses the same normalization and duplicate checks as normal inventory entry.
 - Keep report endpoints and the AngularJS report screen in their own `reports` MVC module, and assign report/import permissions to the relevant built-in roles.
 - Add simple local start scripts for MySQL/API and the AngularJS dev server, and document the browser URL and first-run bootstrap login setup.
+
+### Phase 6 implementation scope
+
+- Send configurable SMTP notifications for ticket creation, assignment, status changes, and public updates; keep local startup usable when email is not configured.
+- Add a persisted ticket chat stream over authenticated WebSocket/STOMP. Load recent messages from the Tickets module and enforce ticket visibility for both sends and subscriptions; internal ticket notes remain separate.
+- Calculate first-response and resolution targets by ticket priority using wall-clock time, record the first support response, and expose due times and breach state in the ticket UI.
+- Record append-only audit events for ticket, asset, equipment request, and account lifecycle actions. Provide a permission-gated administrator audit screen and do not copy secrets or message bodies into audit summaries.
+- Keep email, chat, SLA, and audit code within the existing modular MVC boundaries and document SMTP setup, SLA targets, and chat behavior.
+
+### Phase 7 implementation scope
+
+- Add repeatable unit and integration tests for validation, permission and ownership checks, ticket workflows, reports/imports, and database migrations. Use MySQL Testcontainers for database-backed integration coverage where Docker is available.
+- Add production container builds for the Spring Boot API and AngularJS frontend, reverse proxy `/api` and WebSocket traffic through one origin, and provide a deployment Compose file that preserves MySQL/upload data.
+- Document local, test, and production setup, required secrets, health checks, backup and restore basics, and release/build steps. Keep production secrets out of the repository.
 
 ## Key design decision
 

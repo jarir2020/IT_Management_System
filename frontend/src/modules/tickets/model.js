@@ -7,6 +7,7 @@ featureModules.tickets.factory('TicketModel', ['$http', $http => {
   return {
     list: () => $http.get(root).then(response => response.data),
     get: id => $http.get(`${root}/${id}`).then(response => response.data),
+    chatMessages: id => $http.get(`${root}/${id}/chat`).then(response => response.data),
     create: payload => $http.post(root, payload).then(response => response.data),
     update: (id, payload) => $http.put(`${root}/${id}`, payload).then(response => response.data),
     agents: () => $http.get(`${root}/agents`).then(response => response.data),

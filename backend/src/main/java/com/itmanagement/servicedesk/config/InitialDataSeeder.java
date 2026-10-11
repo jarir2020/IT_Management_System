@@ -61,7 +61,8 @@ public class InitialDataSeeder implements ApplicationRunner {
             Map.entry("reports:tickets", "Export the service desk ticket queue"),
             Map.entry("reports:requests", "Export equipment requests across departments"),
             Map.entry("reports:requests_department", "Export equipment requests for the account's department"),
-            Map.entry("reports:assets_import", "Import assets from an Excel workbook"));
+            Map.entry("reports:assets_import", "Import assets from an Excel workbook"),
+            Map.entry("audit:read", "View the system audit trail"));
 
     private static final Set<String> REQUESTER_PERMISSIONS = Set.of(
             "departments:read", "tickets:read", "tickets:create", "tickets:comment", "tickets:attach",

@@ -25,7 +25,7 @@ AngularJS 1.8.3 is end of life. The current dependency tree also reports two adv
 
 ## Current phase
 
-Phases 1–5 are complete: login/logout, database-backed roles and permissions, users and departments, ticket workflows and private attachments, asset inventory and maintenance, equipment requests with department approval and procurement tracking, plus role-scoped reports, asset workbook import, and report ZIP downloads. Email, chat, SLAs, audit logs, automated tests, and release automation follow later.
+Phases 1–6 are complete: login/logout, database-backed roles and permissions, users and departments, ticket workflows and private attachments, asset inventory and maintenance, equipment requests with department approval and procurement tracking, role-scoped reports and imports, email notifications, persisted live ticket chat, priority-based SLAs, and an administrator audit trail. Phase 7 adds automated tests and production packaging.
 
 ## Equipment requests
 
@@ -34,6 +34,10 @@ Employees submit requests for an equipment category with a business justificatio
 ## Reports and imports
 
 Authorized users can export PDF and Excel reports for assets, tickets, and equipment requests, and download a ZIP containing the reports available to their role. IT asset managers can import inventory from `.xlsx`; the importer validates rows individually, uses the same asset rules as manual entry, and returns row-level reasons for skipped records. See [the report and import guide](docs/REPORTS_AND_IMPORTS.md) for permissions and workbook columns.
+
+## Operations
+
+Ticket email notifications are disabled until SMTP values are configured in `.env`. Ticket chat uses authenticated WebSocket/STOMP and retains its message history. SLAs use priority-specific calendar-time targets. Administrators can review action summaries in the Audit trail; message bodies, passwords, and file contents are excluded. See [the operations guide](docs/OPERATIONS.md) for configuration and behavior.
 
 ## Module structure
 

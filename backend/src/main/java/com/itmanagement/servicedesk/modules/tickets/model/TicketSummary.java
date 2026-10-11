@@ -11,5 +11,6 @@ public record TicketSummary(
         TicketUserSummary requester,
         TicketUserSummary assignee,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        TicketSlaSummary sla) {
 }

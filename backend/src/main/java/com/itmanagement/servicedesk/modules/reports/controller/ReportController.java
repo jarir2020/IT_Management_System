@@ -82,8 +82,9 @@ public class ReportController {
 
     @PostMapping(ReportRoutes.ASSET_IMPORT)
     @PreAuthorize("hasAuthority('reports:assets_import')")
-    public ResponseEntity<AssetImportResult> importAssets(@RequestParam("file") MultipartFile file) {
-        return ResponseEntity.status(HttpStatus.OK).body(reports.importAssets(file));
+    public ResponseEntity<AssetImportResult> importAssets(@RequestParam("file") MultipartFile file,
+                                                           @AuthenticationPrincipal UserAccount actor) {
+        return ResponseEntity.status(HttpStatus.OK).body(reports.importAssets(file, actor));
     }
 
     private static ResponseEntity<ByteArrayResource> attachment(byte[] bytes, MediaType mediaType, String filename) {

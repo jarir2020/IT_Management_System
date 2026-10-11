@@ -16,6 +16,7 @@ public record TicketDetailResponse(
         Instant updatedAt,
         Instant resolvedAt,
         Instant closedAt,
+        TicketSlaSummary sla,
         List<TicketCommentResponse> comments,
         List<TicketAttachmentResponse> attachments) {
 }

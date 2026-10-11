@@ -1,5 +1,6 @@
 package com.itmanagement.servicedesk.modules.assets.service;
 
+import com.itmanagement.servicedesk.modules.audit.service.AuditService;
 import com.itmanagement.servicedesk.modules.assets.model.Asset;
 import com.itmanagement.servicedesk.modules.assets.model.AssetAssignment;
 import com.itmanagement.servicedesk.modules.assets.model.AssetAssignmentResponse;
@@ -48,16 +49,18 @@ public class AssetService {
     private final AssetDocumentRepository documents;
     private final UserAccountRepository users;
     private final AssetFileStorage fileStorage;
+    private final AuditService audit;
 
     public AssetService(AssetRepository assets, AssetAssignmentRepository assignments,
                         AssetMaintenanceRepository maintenance, AssetDocumentRepository documents,
-                        UserAccountRepository users, AssetFileStorage fileStorage) {
+                        UserAccountRepository users, AssetFileStorage fileStorage, AuditService audit) {
         this.assets = assets;
         this.assignments = assignments;
         this.maintenance = maintenance;
         this.documents = documents;
         this.users = users;
         this.fileStorage = fileStorage;
+        this.audit = audit;
     }
 
     @Transactional(readOnly = true)
@@ -78,13 +81,17 @@ public class AssetService {
     }
 
     @Transactional
-    public AssetDetailResponse createAsset(AssetRequest request) {
-        return toDetail(saveNewAsset(request));
+    public AssetDetailResponse createAsset(AssetRequest request, UserAccount actor) {
+        Asset asset = saveNewAsset(request);
+        audit.record(actor, "ASSET_CREATED", "ASSET", asset.getId(), "Added an asset to inventory");
+        return toDetail(asset);
     }
 
     @Transactional
-    public AssetSummary createImportedAsset(AssetRequest request) {
-        return toSummary(saveNewAsset(request));
+    public AssetSummary createImportedAsset(AssetRequest request, UserAccount actor) {
+        Asset asset = saveNewAsset(request);
+        audit.record(actor, "ASSET_IMPORTED", "ASSET", asset.getId(), "Imported an asset from a workbook");
+        return toSummary(asset);
     }
 
     private Asset saveNewAsset(AssetRequest request) {
@@ -104,7 +111,7 @@ public class AssetService {
     }
 
     @Transactional
-    public AssetDetailResponse updateAsset(Long assetId, AssetRequest request) {
+    public AssetDetailResponse updateAsset(Long assetId, AssetRequest request, UserAccount actor) {
         Asset asset = findLockedAsset(assetId);
         if (asset.getStatus() == AssetStatus.RETIRED) {
             throw conflict("Retired assets cannot be edited");
@@ -116,6 +123,7 @@ public class AssetService {
                 clean(request.manufacturer()), clean(request.modelNumber()), clean(request.serialNumber()),
                 request.purchaseDate(), request.purchaseCost(), request.warrantyExpiresOn(),
                 request.usefulLifeMonths(), request.salvageValue());
+        audit.record(actor, "ASSET_UPDATED", "ASSET", asset.getId(), "Updated inventory details");
         return toDetail(asset);
     }
 
@@ -141,6 +149,7 @@ public class AssetService {
                 .orElseThrow(() -> badRequest("Choose an active user account"));
         asset.assignTo(assignee);
         assignments.save(new AssetAssignment(asset, assignee, actor, clean(request.note())));
+        audit.record(actor, "ASSET_ASSIGNED", "ASSET", asset.getId(), "Assigned an asset to an employee");
         return toDetail(asset);
     }
 
@@ -160,6 +169,7 @@ public class AssetService {
                 .orElseThrow(() -> badRequest("The requester's account is no longer active"));
         asset.assignTo(assignee);
         assignments.save(new AssetAssignment(asset, assignee, actor, clean(note), requestId));
+        audit.record(actor, "ASSET_ASSIGNED", "ASSET", asset.getId(), "Allocated an asset to an equipment request");
         return toDetail(asset);
     }
 
@@ -172,6 +182,7 @@ public class AssetService {
                 .orElseThrow(() -> conflict("This assignment is no longer active"));
         assignment.markReturned(actor, clean(request.conditionNotes()));
         asset.returnToInventory(request.needsMaintenance());
+        audit.record(actor, "ASSET_RETURNED", "ASSET", asset.getId(), "Returned an asset to inventory");
         return toDetail(asset);
     }
 
@@ -187,12 +198,13 @@ public class AssetService {
         asset.startMaintenance();
         maintenance.save(new AssetMaintenance(asset, actor, request.summary().trim(),
                 clean(request.vendor()), clean(request.notes()), request.cost(), request.startedOn()));
+        audit.record(actor, "ASSET_MAINTENANCE_STARTED", "ASSET", asset.getId(), "Started asset maintenance");
         return toDetail(asset);
     }
 
     @Transactional
     public AssetDetailResponse changeMaintenanceStatus(Long assetId, Long maintenanceId,
-                                                        AssetMaintenanceStatusRequest request) {
+                                                        AssetMaintenanceStatusRequest request, UserAccount actor) {
         Asset asset = findLockedAsset(assetId);
         AssetMaintenance record = maintenance.findByIdAndAssetId(maintenanceId, assetId)
                 .orElseThrow(() -> notFound("Maintenance record not found"));
@@ -205,6 +217,8 @@ public class AssetService {
         if (asset.getStatus() == AssetStatus.UNDER_MAINTENANCE) {
             asset.finishMaintenance();
         }
+        audit.record(actor, "ASSET_MAINTENANCE_UPDATED", "ASSET", asset.getId(),
+                "Changed maintenance status to " + request.status());
         return toDetail(asset);
     }
 
@@ -216,6 +230,7 @@ public class AssetService {
         removeStoredFileIfTransactionRollsBack(stored.storageKey());
         documents.save(new AssetDocument(asset, actor, type, stored.originalFilename(),
                 stored.storageKey(), stored.sizeBytes()));
+        audit.record(actor, "ASSET_DOCUMENT_ADDED", "ASSET", asset.getId(), "Added an asset document");
         return toDetail(asset);
     }
 
@@ -236,11 +251,12 @@ public class AssetService {
         String storageKey = document.getStorageKey();
         documents.delete(document);
         deleteStoredFileAfterCommit(storageKey);
+        audit.record(actor, "ASSET_DOCUMENT_REMOVED", "ASSET", asset.getId(), "Removed an asset document");
         return toDetail(asset);
     }
 
     @Transactional
-    public AssetDetailResponse retireAsset(Long assetId) {
+    public AssetDetailResponse retireAsset(Long assetId, UserAccount actor) {
         Asset asset = findLockedAsset(assetId);
         if (asset.getStatus() == AssetStatus.ASSIGNED
                 || (asset.getStatus() == AssetStatus.UNDER_MAINTENANCE
@@ -249,6 +265,7 @@ public class AssetService {
         }
         if (asset.getStatus() == AssetStatus.RETIRED) return toDetail(asset);
         asset.retire();
+        audit.record(actor, "ASSET_RETIRED", "ASSET", asset.getId(), "Retired an asset");
         return toDetail(asset);
     }
 

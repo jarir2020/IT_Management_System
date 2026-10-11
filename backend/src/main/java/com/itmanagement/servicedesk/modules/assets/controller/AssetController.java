@@ -62,8 +62,9 @@ public class AssetController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('assets:create')")
-    public AssetDetailResponse create(@Valid @RequestBody AssetRequest request) {
-        return assets.createAsset(request);
+    public AssetDetailResponse create(@Valid @RequestBody AssetRequest request,
+                                      @AuthenticationPrincipal UserAccount actor) {
+        return assets.createAsset(request, actor);
     }
 
     @GetMapping(AssetRoutes.BY_ID)
@@ -75,8 +76,9 @@ public class AssetController {
 
     @PutMapping(AssetRoutes.BY_ID)
     @PreAuthorize("hasAuthority('assets:update')")
-    public AssetDetailResponse update(@PathVariable Long assetId, @Valid @RequestBody AssetRequest request) {
-        return assets.updateAsset(assetId, request);
+    public AssetDetailResponse update(@PathVariable Long assetId, @Valid @RequestBody AssetRequest request,
+                                      @AuthenticationPrincipal UserAccount actor) {
+        return assets.updateAsset(assetId, request, actor);
     }
 
     @PostMapping(AssetRoutes.ASSIGNMENTS)
@@ -109,8 +111,9 @@ public class AssetController {
     @PreAuthorize("hasAuthority('assets:maintenance')")
     public AssetDetailResponse changeMaintenanceStatus(@PathVariable Long assetId,
                                                         @PathVariable Long maintenanceId,
-                                                        @Valid @RequestBody AssetMaintenanceStatusRequest request) {
-        return assets.changeMaintenanceStatus(assetId, maintenanceId, request);
+                                                        @Valid @RequestBody AssetMaintenanceStatusRequest request,
+                                                        @AuthenticationPrincipal UserAccount actor) {
+        return assets.changeMaintenanceStatus(assetId, maintenanceId, request, actor);
     }
 
     @PostMapping(value = AssetRoutes.DOCUMENTS, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -148,7 +151,8 @@ public class AssetController {
 
     @PatchMapping(AssetRoutes.RETIRE)
     @PreAuthorize("hasAuthority('assets:delete')")
-    public AssetDetailResponse retire(@PathVariable Long assetId) {
-        return assets.retireAsset(assetId);
+    public AssetDetailResponse retire(@PathVariable Long assetId,
+                                      @AuthenticationPrincipal UserAccount actor) {
+        return assets.retireAsset(assetId, actor);
     }
 }

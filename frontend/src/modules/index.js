@@ -19,3 +19,5 @@ import './requests/controllers.js';
 import './reports/model.js';
 import './reports/controllers.js';
 import './reports/file-input.directive.js';
+import './audit/model.js';
+import './audit/controllers.js';

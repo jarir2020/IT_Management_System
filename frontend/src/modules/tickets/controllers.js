@@ -1,4 +1,5 @@
 import { featureModules } from '../registry.js';
+import { Client } from '@stomp/stompjs';
 
 const categories = [
   { value: 'HARDWARE', label: 'Hardware' },
@@ -68,8 +69,8 @@ featureModules.tickets.controller('TicketCreateController', ['$state', 'TicketMo
 }]);
 
 featureModules.tickets.controller('TicketDetailController', [
-  '$state', '$stateParams', '$window', 'AuthService', 'TicketModel',
-  function ($state, $stateParams, $window, AuthService, TicketModel) {
+  '$state', '$stateParams', '$window', '$rootScope', '$scope', 'AuthService', 'TicketModel',
+  function ($state, $stateParams, $window, $rootScope, $scope, AuthService, TicketModel) {
     const vm = this;
     vm.ticket = null;
     vm.user = null;
@@ -84,7 +85,12 @@ featureModules.tickets.controller('TicketDetailController', [
     vm.error = '';
     vm.editing = false;
     vm.comment = { message: '', internalNote: false };
+    vm.chatMessages = [];
+    vm.chatDraft = '';
+    vm.chatConnected = false;
+    vm.chatError = '';
     vm.selectedFile = null;
+    let chatClient = null;
 
     vm.can = permission => vm.user?.permissions?.includes(permission) ?? false;
     vm.isRequester = () => vm.ticket?.requester?.id === vm.user?.id;
@@ -96,6 +102,42 @@ featureModules.tickets.controller('TicketDetailController', [
     vm.canClose = () => vm.ticket?.status === 'RESOLVED'
       && (vm.isRequester() || (vm.can('tickets:status') && vm.canManage()));
     vm.label = value => value?.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase());
+
+    const connectChat = ticketId => {
+      const protocol = $window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      chatClient = new Client({
+        brokerURL: `${protocol}//${$window.location.host}/ws`,
+        reconnectDelay: 4000,
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
+        onConnect: () => {
+          $rootScope.$applyAsync(() => { vm.chatConnected = true; vm.chatError = ''; });
+          chatClient.subscribe(`/topic/tickets/${ticketId}/chat`, frame => {
+            const message = JSON.parse(frame.body);
+            $rootScope.$applyAsync(() => {
+              if (!vm.chatMessages.some(existing => existing.id === message.id)) vm.chatMessages.push(message);
+            });
+          });
+        },
+        onWebSocketClose: () => $rootScope.$applyAsync(() => { vm.chatConnected = false; }),
+        onStompError: frame => $rootScope.$applyAsync(() => {
+          vm.chatConnected = false;
+          vm.chatError = frame.headers.message || 'Ticket chat could not connect.';
+        })
+      });
+      chatClient.activate();
+    };
+
+    vm.sendChat = form => {
+      if (!vm.chatDraft.trim() || !vm.chatConnected || !chatClient?.connected || vm.ticket.status === 'CLOSED') return;
+      chatClient.publish({
+        destination: `/app/tickets/${vm.ticket.id}/chat`,
+        body: JSON.stringify({ message: vm.chatDraft.trim() })
+      });
+      vm.chatDraft = '';
+      form.$setPristine();
+      form.$setUntouched();
+    };
 
     const copyTicketToForm = () => {
       vm.editForm = {
@@ -118,10 +160,14 @@ featureModules.tickets.controller('TicketDetailController', [
         .then(ticket => {
           vm.ticket = ticket;
           copyTicketToForm();
-          if (vm.can('tickets:assign')) {
-            return TicketModel.agents().then(agents => { vm.agents = agents; });
-          }
-          return null;
+          const supporting = vm.can('tickets:assign')
+            ? TicketModel.agents().then(agents => { vm.agents = agents; }) : Promise.resolve();
+          return Promise.all([
+            supporting,
+            TicketModel.chatMessages(ticket.id)
+              .then(messages => { vm.chatMessages = messages; })
+              .catch(() => { vm.chatError = 'Could not load earlier chat messages.'; })
+          ]).then(() => connectChat(ticket.id));
         })
         .catch(error => { vm.error = errorMessage(error, 'Could not load this ticket.'); })
         .finally(() => { vm.loading = false; });
@@ -198,5 +244,6 @@ featureModules.tickets.controller('TicketDetailController', [
     };
 
     vm.load();
+    $scope.$on('$destroy', () => { if (chatClient) chatClient.deactivate(); });
   }
 ]);

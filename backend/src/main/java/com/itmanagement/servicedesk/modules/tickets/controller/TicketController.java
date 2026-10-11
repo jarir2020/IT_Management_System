@@ -1,6 +1,7 @@
 package com.itmanagement.servicedesk.modules.tickets.controller;
 
 import com.itmanagement.servicedesk.modules.tickets.model.TicketAssigneeRequest;
+import com.itmanagement.servicedesk.modules.tickets.model.TicketChatMessageResponse;
 import com.itmanagement.servicedesk.modules.tickets.model.TicketCommentRequest;
 import com.itmanagement.servicedesk.modules.tickets.model.TicketCreateRequest;
 import com.itmanagement.servicedesk.modules.tickets.model.TicketDetailResponse;
@@ -10,6 +11,7 @@ import com.itmanagement.servicedesk.modules.tickets.model.TicketUpdateRequest;
 import com.itmanagement.servicedesk.modules.tickets.model.TicketUserSummary;
 import com.itmanagement.servicedesk.modules.tickets.routes.TicketRoutes;
 import com.itmanagement.servicedesk.modules.tickets.service.TicketDownload;
+import com.itmanagement.servicedesk.modules.tickets.service.TicketChatService;
 import com.itmanagement.servicedesk.modules.tickets.service.TicketService;
 import com.itmanagement.servicedesk.modules.users.model.UserAccount;
 import jakarta.validation.Valid;
@@ -41,9 +43,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(TicketRoutes.BASE_PATH)
 public class TicketController {
     private final TicketService tickets;
+    private final TicketChatService chat;
 
-    public TicketController(TicketService tickets) {
+    public TicketController(TicketService tickets, TicketChatService chat) {
         this.tickets = tickets;
+        this.chat = chat;
     }
 
     @GetMapping
@@ -71,6 +75,13 @@ public class TicketController {
     public TicketDetailResponse get(@PathVariable Long ticketId,
                                     @AuthenticationPrincipal UserAccount actor) {
         return tickets.getTicket(ticketId, actor);
+    }
+
+    @GetMapping(TicketRoutes.CHAT)
+    @PreAuthorize("hasAuthority('tickets:read')")
+    public List<TicketChatMessageResponse> recentChat(@PathVariable Long ticketId,
+                                                       @AuthenticationPrincipal UserAccount actor) {
+        return chat.recent(ticketId, actor);
     }
 
     @PutMapping(TicketRoutes.BY_ID)

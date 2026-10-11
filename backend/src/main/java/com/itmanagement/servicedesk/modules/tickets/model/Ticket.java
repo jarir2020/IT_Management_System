@@ -59,6 +59,9 @@ public class Ticket {
     @Column(name = "resolved_at")
     private Instant resolvedAt;
 
+    @Column(name = "first_responded_at")
+    private Instant firstRespondedAt;
+
     @Column(name = "closed_at")
     private Instant closedAt;
 
@@ -102,6 +105,7 @@ public class Ticket {
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public Instant getResolvedAt() { return resolvedAt; }
+    public Instant getFirstRespondedAt() { return firstRespondedAt; }
     public Instant getClosedAt() { return closedAt; }
 
     public void updateDetails(String title, String description, TicketCategory category, TicketPriority priority) {
@@ -118,7 +122,12 @@ public class Ticket {
     public void changeStatus(TicketStatus status) {
         Instant now = Instant.now();
         this.status = status;
+        if (status == TicketStatus.IN_PROGRESS) markFirstResponse(now);
         if (status == TicketStatus.RESOLVED) resolvedAt = now;
         if (status == TicketStatus.CLOSED) closedAt = now;
+    }
+
+    public void markFirstResponse(Instant at) {
+        if (firstRespondedAt == null) firstRespondedAt = at;
     }
 }

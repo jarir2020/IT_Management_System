@@ -8,6 +8,7 @@ import { registerTicketRoutes } from './tickets/routes.js';
 import { registerAssetRoutes } from './assets/routes.js';
 import { registerEquipmentRequestRoutes } from './requests/routes.js';
 import { registerReportRoutes } from './reports/routes.js';
+import { registerAuditRoutes } from './audit/routes.js';
 
 // Route composition stays small; each route definition belongs to its feature.
 export function registerFeatureRoutes($stateProvider) {
@@ -21,4 +22,5 @@ export function registerFeatureRoutes($stateProvider) {
   registerAssetRoutes($stateProvider);
   registerEquipmentRequestRoutes($stateProvider);
   registerReportRoutes($stateProvider);
+  registerAuditRoutes($stateProvider);
 }

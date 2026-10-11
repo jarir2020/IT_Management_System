@@ -1,0 +1,107 @@
+<div ng-if="vm.loading" class="table-empty ticket-loading"><span class="loading-indicator"></span> Loading asset…</div>
+<div ng-if="!vm.loading && vm.error && !vm.asset" class="notice notice-error" role="alert">{{ vm.error }}</div>
+
+<div ng-if="vm.asset">
+  <section class="page-heading asset-detail-heading">
+    <div>
+      <div class="breadcrumb-label"><a ui-sref="workspace.assets">INVENTORY</a> <span>/</span> {{ vm.asset.assetTag }}</div>
+      <h1>{{ vm.asset.name }}<span class="heading-period">.</span></h1>
+      <p class="page-intro">{{ vm.label(vm.asset.category) }} · Added {{ vm.asset.createdAt | date:'MMM d, yyyy' }}</p>
+    </div>
+    <div class="ticket-detail-actions">
+      <span class="asset-status" ng-class="'asset-status-' + vm.asset.status.toLowerCase().replace('_', '-')">{{ vm.label(vm.asset.status) }}</span>
+      <button class="button button-danger-quiet" type="button" ng-if="vm.canRetire() && vm.asset.status !== 'RETIRED'" ng-click="vm.retire()">Retire asset</button>
+    </div>
+  </section>
+
+  <div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+  <div class="asset-detail-grid">
+    <main class="asset-detail-main">
+      <section class="ticket-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">INVENTORY RECORD</span><h2>Specifications</h2></div><button class="text-action" type="button" ng-if="vm.canEdit() && !vm.editing" ng-click="vm.editing = true">Edit details</button></div>
+        <dl class="ticket-properties-list" ng-if="!vm.editing">
+          <div><dt>Asset tag</dt><dd>{{ vm.asset.assetTag }}</dd></div>
+          <div><dt>Manufacturer</dt><dd>{{ vm.asset.manufacturer || 'Not recorded' }}</dd></div>
+          <div><dt>Model</dt><dd>{{ vm.asset.modelNumber || 'Not recorded' }}</dd></div>
+          <div><dt>Serial number</dt><dd>{{ vm.asset.serialNumber || 'Not recorded' }}</dd></div>
+          <div><dt>Purchase date</dt><dd>{{ vm.asset.purchaseDate ? (vm.asset.purchaseDate | date:'MMM d, yyyy') : 'Not recorded' }}</dd></div>
+          <div><dt>Purchase cost</dt><dd>{{ vm.asset.purchaseCost != null ? (vm.asset.purchaseCost | currency) : 'Not recorded' }}</dd></div>
+          <div><dt>Warranty ends</dt><dd>{{ vm.asset.warrantyExpiresOn ? (vm.asset.warrantyExpiresOn | date:'MMM d, yyyy') : 'Not recorded' }}</dd></div>
+          <div><dt>Description</dt><dd class="asset-description">{{ vm.asset.description || 'No description recorded.' }}</dd></div>
+        </dl>
+        <form ng-if="vm.editing" name="assetEditForm" ng-submit="vm.save(assetEditForm)" novalidate>
+          <div class="asset-form-grid">
+            <div class="form-field"><label for="edit-asset-tag">Asset tag</label><input id="edit-asset-tag" ng-model="vm.editForm.assetTag" maxlength="48" required /></div>
+            <div class="form-field"><label for="edit-asset-name">Name</label><input id="edit-asset-name" ng-model="vm.editForm.name" maxlength="140" required /></div>
+            <div class="form-field"><label for="edit-asset-category">Category</label><select id="edit-asset-category" ng-model="vm.editForm.category" ng-options="category.value as category.label for category in vm.categories"></select></div>
+            <div class="form-field"><label for="edit-asset-manufacturer">Manufacturer</label><input id="edit-asset-manufacturer" ng-model="vm.editForm.manufacturer" maxlength="100" /></div>
+            <div class="form-field"><label for="edit-asset-model">Model</label><input id="edit-asset-model" ng-model="vm.editForm.modelNumber" maxlength="100" /></div>
+            <div class="form-field"><label for="edit-asset-serial">Serial number</label><input id="edit-asset-serial" ng-model="vm.editForm.serialNumber" maxlength="100" /></div>
+            <div class="form-field"><label for="edit-asset-purchase-date">Purchase date</label><input id="edit-asset-purchase-date" type="date" ng-model="vm.editForm.purchaseDate" /></div>
+            <div class="form-field"><label for="edit-asset-purchase-cost">Purchase cost</label><input id="edit-asset-purchase-cost" type="number" min="0" step="0.01" ng-model="vm.editForm.purchaseCost" /></div>
+            <div class="form-field"><label for="edit-asset-warranty-date">Warranty ends</label><input id="edit-asset-warranty-date" type="date" ng-model="vm.editForm.warrantyExpiresOn" /></div>
+            <div class="form-field asset-description-field"><label for="edit-asset-description">Description</label><textarea id="edit-asset-description" ng-model="vm.editForm.description" maxlength="5000" rows="4"></textarea></div>
+          </div>
+          <div class="modal-actions"><button class="button button-quiet" type="button" ng-click="vm.editing = false">Cancel</button><button class="button button-primary" type="submit" ng-disabled="assetEditForm.$invalid || vm.saving">{{ vm.saving ? 'Saving…' : 'Save changes' }}</button></div>
+        </form>
+      </section>
+
+      <section class="ticket-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">LIFECYCLE</span><h2>Assignment history</h2></div><span class="ticket-activity-count">{{ vm.asset.assignments.length }} records</span></div>
+        <div class="asset-history-list" ng-if="vm.asset.assignments.length">
+          <article class="asset-history-item" ng-repeat="record in vm.asset.assignments track by record.id">
+            <span class="asset-history-mark">↔</span><div><strong>{{ record.assignedTo.firstName }} {{ record.assignedTo.lastName }}</strong><p>Assigned {{ record.assignedAt | date:'MMM d, yyyy' }} by {{ record.assignedBy.firstName }} {{ record.assignedBy.lastName }}<span ng-if="record.assignmentNote"> · {{ record.assignmentNote }}</span></p><small ng-if="record.returnedAt">Returned {{ record.returnedAt | date:'MMM d, yyyy' }}<span ng-if="record.returnCondition"> · {{ record.returnCondition }}</span></small><small ng-if="!record.returnedAt" class="asset-current-label">Current assignment</small></div>
+          </article>
+        </div>
+        <div class="asset-history-empty" ng-if="!vm.asset.assignments.length">No assignment history yet.</div>
+      </section>
+
+      <section class="ticket-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">REPAIRS</span><h2>Maintenance history</h2></div><span class="ticket-activity-count">{{ vm.asset.maintenance.length }} records</span></div>
+        <div class="asset-history-list" ng-if="vm.asset.maintenance.length">
+          <article class="asset-history-item" ng-repeat="record in vm.asset.maintenance track by record.id">
+            <span class="asset-history-mark asset-repair-mark">⌁</span><div class="asset-history-copy"><div class="asset-record-heading"><strong>{{ record.summary }}</strong><span class="asset-status" ng-class="'asset-status-' + record.status.toLowerCase().replace('_', '-')">{{ vm.label(record.status) }}</span></div><p>{{ record.startedOn | date:'MMM d, yyyy' }}<span ng-if="record.completedOn"> – {{ record.completedOn | date:'MMM d, yyyy' }}</span><span ng-if="record.vendor"> · {{ record.vendor }}</span><span ng-if="record.cost != null"> · {{ record.cost | currency }}</span></p><small>{{ record.notes || 'No additional notes.' }}</small><div class="asset-record-actions" ng-if="record.status === 'IN_PROGRESS' && vm.can('assets:maintenance')"><button class="text-action" type="button" ng-click="vm.changeMaintenance(record, 'COMPLETED')">Mark complete</button><button class="text-action" type="button" ng-click="vm.changeMaintenance(record, 'CANCELLED')">Cancel record</button></div></div>
+          </article>
+        </div>
+        <div class="asset-history-empty" ng-if="!vm.asset.maintenance.length">No maintenance recorded.</div>
+        <form class="asset-maintenance-form" name="maintenanceForm" ng-if="vm.canStartMaintenance()" ng-submit="vm.startMaintenance(maintenanceForm)" novalidate>
+          <div class="asset-subsection-heading"><strong>Start a repair record</strong><span>Starting maintenance moves this item out of available inventory.</span></div>
+          <div class="asset-form-grid"><div class="form-field"><label for="maintenance-summary">Summary</label><input id="maintenance-summary" ng-model="vm.maintenanceForm.summary" maxlength="180" required /></div><div class="form-field"><label for="maintenance-vendor">Repair vendor</label><input id="maintenance-vendor" ng-model="vm.maintenanceForm.vendor" maxlength="100" /></div><div class="form-field"><label for="maintenance-started">Started on</label><input id="maintenance-started" type="date" ng-model="vm.maintenanceForm.startedOn" required /></div><div class="form-field"><label for="maintenance-cost">Cost</label><input id="maintenance-cost" type="number" min="0" step="0.01" ng-model="vm.maintenanceForm.cost" /></div><div class="form-field asset-description-field"><label for="maintenance-notes">Notes</label><textarea id="maintenance-notes" ng-model="vm.maintenanceForm.notes" maxlength="5000" rows="3"></textarea></div></div>
+          <div class="asset-form-actions"><button class="button button-quiet" type="submit" ng-disabled="maintenanceForm.$invalid || vm.working">{{ vm.working ? 'Saving…' : 'Start maintenance' }}</button></div>
+        </form>
+      </section>
+    </main>
+
+    <aside class="asset-detail-aside">
+      <section class="ticket-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">CURRENT STATE</span><h2>Assignment</h2></div></div>
+        <dl class="ticket-properties-list"><div><dt>Assigned to</dt><dd ng-if="vm.asset.assignedTo">{{ vm.asset.assignedTo.firstName }} {{ vm.asset.assignedTo.lastName }}<small>{{ vm.asset.assignedTo.department || vm.asset.assignedTo.email }}</small></dd><dd ng-if="!vm.asset.assignedTo">Unassigned</dd></div><div><dt>Last updated</dt><dd>{{ vm.asset.updatedAt | date:'MMM d, yyyy · h:mm a' }}</dd></div></dl>
+        <form class="ticket-assignment-form" ng-if="vm.canAssign()" ng-submit="vm.assign()">
+          <label for="asset-assignee">Assign to employee</label><select id="asset-assignee" ng-model="vm.assignment.userId" ng-options="user.id as (user.firstName + ' ' + user.lastName) for user in vm.users" required><option value="">Choose an employee</option></select>
+          <input aria-label="Assignment note" ng-model="vm.assignment.note" maxlength="1000" placeholder="Optional handover note" />
+          <button class="button button-quiet button-full" type="submit" ng-disabled="!vm.assignment.userId || vm.working">{{ vm.working ? 'Saving…' : 'Assign asset' }}</button>
+        </form>
+        <form class="ticket-assignment-form" ng-if="vm.canReturn()" ng-submit="vm.returnAsset()">
+          <label for="asset-return-condition">Return condition</label><textarea id="asset-return-condition" ng-model="vm.returnInfo.conditionNotes" maxlength="2000" rows="3" placeholder="Condition notes (optional)"></textarea>
+          <label class="asset-checkbox-label"><input type="checkbox" ng-model="vm.returnInfo.needsMaintenance" /> <span>Send to maintenance after return</span></label>
+          <button class="button button-quiet button-full" type="submit" ng-disabled="vm.working">{{ vm.working ? 'Saving…' : 'Record return' }}</button>
+        </form>
+      </section>
+
+      <section class="ticket-panel">
+        <div class="ticket-panel-heading"><div><span class="section-kicker">DOCUMENTS</span><h2>Receipts & warranty</h2></div><span class="ticket-activity-count">{{ vm.asset.documents.length }}</span></div>
+        <div class="ticket-attachment-list">
+          <div class="ticket-attachment" ng-repeat="document in vm.asset.documents track by document.id"><span class="ticket-file-icon">▤</span><div class="ticket-file-meta"><strong>{{ document.originalFilename }}</strong><small>{{ vm.label(document.type) }} · {{ document.sizeBytes / 1024 | number:0 }} KB</small></div><button type="button" class="icon-button" ng-click="vm.downloadDocument(document)" title="Download document" aria-label="Download document">↓</button><button type="button" class="icon-button attachment-remove" ng-if="vm.can('assets:document')" ng-click="vm.deleteDocument(document)" title="Remove document" aria-label="Remove document">×</button></div>
+          <div class="ticket-files-empty" ng-if="!vm.asset.documents.length">No documents attached.</div>
+        </div>
+        <form class="ticket-upload-form" ng-if="vm.can('assets:document')" ng-submit="vm.uploadDocument()">
+          <label for="asset-document">Add a document <small>PDF, image, text, or spreadsheet · max 10 MB</small></label>
+          <select id="asset-document-type" ng-model="vm.documentType"><option value="PURCHASE_RECEIPT">Purchase receipt</option><option value="WARRANTY_DOCUMENT">Warranty document</option><option value="OTHER">Other</option></select>
+          <input id="asset-document" type="file" asset-file-input accept=".pdf,.png,.jpg,.jpeg,.gif,.txt,.csv,.doc,.docx,.xls,.xlsx" />
+          <div class="ticket-upload-submit" ng-if="vm.selectedFile"><span>{{ vm.selectedFile.name }}</span><button class="button button-quiet" type="submit" ng-disabled="vm.uploading">{{ vm.uploading ? 'Uploading…' : 'Upload' }}</button></div>
+        </form>
+      </section>
+    </aside>
+  </div>
+</div>

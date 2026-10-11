@@ -40,6 +40,7 @@ server:
         secure: ${SESSION_COOKIE_SECURE:false}
 app:
   ticket-upload-dir: ${TICKET_UPLOAD_DIR:./var/uploads/tickets}
+  asset-upload-dir: ${ASSET_UPLOAD_DIR:./var/uploads/assets}
   bootstrap:
     admin-email: ${BOOTSTRAP_ADMIN_EMAIL:}
     admin-password: ${BOOTSTRAP_ADMIN_PASSWORD:}

@@ -1,0 +1,26 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label"><a ui-sref="workspace.assets">INVENTORY</a> <span>/</span> NEW ASSET</div>
+    <h1>Add an asset<span class="heading-period">.</span></h1>
+    <p class="page-intro">Create an inventory record with a unique tag and lifecycle details.</p>
+  </div>
+</section>
+
+<div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+<form class="asset-form-card" name="assetCreateForm" ng-submit="vm.submit(assetCreateForm)" novalidate>
+  <div class="ticket-panel-heading"><div><span class="section-kicker">INVENTORY RECORD</span><h2>Asset details</h2></div></div>
+  <div class="asset-form-grid">
+    <div class="form-field"><label for="asset-tag">Asset tag</label><input id="asset-tag" name="assetTag" ng-model="vm.form.assetTag" maxlength="48" placeholder="IT-LAP-001" required /><small>Use a unique label from your inventory.</small></div>
+    <div class="form-field"><label for="asset-name">Name</label><input id="asset-name" name="name" ng-model="vm.form.name" maxlength="140" placeholder="Finance team laptop" required /></div>
+    <div class="form-field"><label for="asset-category">Category</label><select id="asset-category" ng-model="vm.form.category" ng-options="category.value as category.label for category in vm.categories"></select></div>
+    <div class="form-field"><label for="asset-manufacturer">Manufacturer</label><input id="asset-manufacturer" ng-model="vm.form.manufacturer" maxlength="100" /></div>
+    <div class="form-field"><label for="asset-model">Model</label><input id="asset-model" ng-model="vm.form.modelNumber" maxlength="100" /></div>
+    <div class="form-field"><label for="asset-serial">Serial number</label><input id="asset-serial" ng-model="vm.form.serialNumber" maxlength="100" /></div>
+    <div class="form-field"><label for="asset-purchase-date">Purchase date</label><input id="asset-purchase-date" type="date" ng-model="vm.form.purchaseDate" /></div>
+    <div class="form-field"><label for="asset-purchase-cost">Purchase cost</label><input id="asset-purchase-cost" type="number" min="0" step="0.01" ng-model="vm.form.purchaseCost" /></div>
+    <div class="form-field"><label for="asset-warranty-date">Warranty ends</label><input id="asset-warranty-date" type="date" ng-model="vm.form.warrantyExpiresOn" /></div>
+    <div class="form-field asset-description-field"><label for="asset-description">Description and specifications</label><textarea id="asset-description" ng-model="vm.form.description" maxlength="5000" rows="4"></textarea></div>
+  </div>
+  <div class="ticket-form-footer"><span>New assets enter inventory as Available.</span><div><a class="button button-quiet" ui-sref="workspace.assets">Cancel</a><button class="button button-primary" type="submit" ng-disabled="assetCreateForm.$invalid || vm.saving">{{ vm.saving ? 'Saving…' : 'Save asset' }}</button></div></div>
+</form>

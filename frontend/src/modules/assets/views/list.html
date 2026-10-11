@@ -1,0 +1,43 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label">WORKSPACE <span>/</span> INVENTORY</div>
+    <h1>Assets<span class="heading-period">.</span></h1>
+    <p class="page-intro">Track equipment, ownership, repairs, and warranty dates.</p>
+  </div>
+  <a class="button button-primary" ng-if="vm.can('assets:create')" ui-sref="workspace.newAsset"><span class="button-plus">＋</span> Add asset</a>
+</section>
+
+<div class="notice notice-error" ng-if="vm.error" role="alert">{{ vm.error }}</div>
+
+<section class="directory-toolbar asset-toolbar">
+  <div class="directory-count"><strong>{{ vm.filteredAssets().length }}</strong><span>assets</span></div>
+  <label class="search-box"><span aria-hidden="true">⌕</span><input type="search" ng-model="vm.search" placeholder="Search tags, items, or assignees" aria-label="Search assets" /></label>
+  <label class="ticket-filter-label" for="asset-status-filter">Status</label>
+  <select id="asset-status-filter" class="ticket-status-filter" ng-model="vm.statusFilter">
+    <option value="">All statuses</option>
+    <option value="AVAILABLE">Available</option>
+    <option value="ASSIGNED">Assigned</option>
+    <option value="UNDER_MAINTENANCE">Under maintenance</option>
+    <option value="RETIRED">Retired</option>
+  </select>
+</section>
+
+<section class="table-card">
+  <div class="table-scroll">
+    <table class="data-table asset-table">
+      <thead><tr><th>ASSET</th><th>CATEGORY</th><th>ASSIGNED TO</th><th>STATUS</th><th>WARRANTY</th></tr></thead>
+      <tbody>
+        <tr ng-if="vm.loading"><td colspan="5" class="table-empty"><span class="loading-indicator"></span> Loading assets…</td></tr>
+        <tr ng-if="!vm.loading && vm.filteredAssets().length === 0"><td colspan="5" class="table-empty">No assets match your filters.</td></tr>
+        <tr ng-repeat="asset in vm.filteredAssets() track by asset.id" class="asset-row" ui-sref="workspace.assetDetail({assetId: asset.id})">
+          <td><div class="asset-title-cell"><strong>{{ asset.name }}</strong><small>{{ asset.assetTag }}</small></div></td>
+          <td><span class="table-muted">{{ vm.label(asset.category) }}</span></td>
+          <td><span class="table-muted" ng-if="!asset.assignedTo">—</span><div class="ticket-person-cell" ng-if="asset.assignedTo"><strong>{{ asset.assignedTo.firstName }} {{ asset.assignedTo.lastName }}</strong><small>{{ asset.assignedTo.department || asset.assignedTo.email }}</small></div></td>
+          <td><span class="asset-status" ng-class="'asset-status-' + asset.status.toLowerCase().replace('_', '-')">{{ vm.label(asset.status) }}</span></td>
+          <td><span class="table-muted">{{ asset.warrantyExpiresOn ? (asset.warrantyExpiresOn | date:'MMM d, yyyy') : 'Not recorded' }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-foot"><span>Employees see assets currently assigned to them; asset managers see inventory.</span><span>{{ vm.assets.length }} total</span></div>
+</section>

@@ -27,6 +27,10 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, Long> 
     @Query("select distinct u from UserAccount u join u.roles r where u.enabled = true and r.code in ('SUPPORT_AGENT', 'ADMIN') order by u.lastName, u.firstName")
     List<UserAccount> findActiveSupportAgents();
 
+    @EntityGraph(attributePaths = {"department", "roles", "roles.permissions"})
+    @Query("select distinct u from UserAccount u where u.enabled = true order by u.lastName, u.firstName")
+    List<UserAccount> findAllActiveForAssetAssignments();
+
     long countByDepartmentId(Long departmentId);
 
     @Query("select count(distinct u) from UserAccount u join u.roles r where r.code = :roleCode and u.enabled = true")

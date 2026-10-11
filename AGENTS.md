@@ -37,4 +37,4 @@ Build the backend with `cd backend && mvn -DskipTests package` and the frontend 
 
 - Update `plan.md` when phase status or scope changes and update `README.md` for user-visible setup or feature changes.
 - Keep `.env.example` limited to placeholders and commit only source, documentation, and intentional project configuration.
-- Do not commit `backend/target`, `backend/var/uploads`, `frontend/node_modules`, or `frontend/dist`.
+- Do not commit `backend/target`, any `var/uploads` directory, `frontend/node_modules`, or `frontend/dist`.

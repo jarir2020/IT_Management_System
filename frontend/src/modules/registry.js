@@ -8,5 +8,6 @@ export const featureModules = {
   users: angular.module('itDesk.users', []),
   departments: angular.module('itDesk.departments', []),
   access: angular.module('itDesk.access', []),
-  tickets: angular.module('itDesk.tickets', [])
+  tickets: angular.module('itDesk.tickets', []),
+  assets: angular.module('itDesk.assets', [])
 };

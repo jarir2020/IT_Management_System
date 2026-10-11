@@ -493,3 +493,72 @@ ng-cloak, [ng-cloak] { display: none !important; }
   .ticket-form-footer > div { align-self: flex-end; }
   .ticket-comment-meta time { margin-left: 0; }
 }
+
+/* Asset Management module */
+.asset-toolbar { display: flex; align-items: center; gap: 12px; }
+.asset-toolbar .search-box { flex: 1 1 260px; }
+.asset-row { cursor: pointer; transition: background .14s; }
+.asset-row:hover { background: #f8fbfc; }
+.asset-title-cell { display: flex; flex-direction: column; gap: 4px; }
+.asset-title-cell strong { color: #3d566a; font-size: 10px; font-weight: 600; }
+.asset-title-cell small { color: #91a0aa; font-size: 8px; letter-spacing: .4px; }
+.asset-status { display: inline-flex; align-items: center; min-height: 22px; padding: 3px 8px; border: 1px solid #e4e9ec; border-radius: 20px; color: #788894; background: #f7f9fa; font-size: 8px; font-weight: 600; white-space: nowrap; }
+.asset-status-available { border-color: #c9e6dc; color: #3e8b78; background: #eff8f4; }
+.asset-status-assigned { border-color: #d6e5ee; color: #4f829e; background: #f0f7fa; }
+.asset-status-under-maintenance, .asset-status-in-progress { border-color: #e8d9bb; color: #9a753d; background: #fbf7ed; }
+.asset-status-retired, .asset-status-completed { border-color: #e2e6e9; color: #7a858c; background: #f3f5f6; }
+.asset-status-cancelled { border-color: #efd5d3; color: #b3625e; background: #fff6f5; }
+.asset-form-card { max-width: 900px; padding: 23px; border: 1px solid #e6ecef; border-radius: 9px; background: #fff; }
+.asset-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.asset-form-grid .form-field { min-width: 0; }
+.asset-form-grid input, .asset-form-grid select, .asset-form-grid textarea { width: 100%; min-height: 39px; padding: 9px 10px; border: 1px solid #dfe6eb; border-radius: 6px; color: #53677a; background: #fff; font: inherit; font-size: 9px; }
+.asset-form-grid textarea { min-height: 78px; line-height: 1.55; resize: vertical; }
+.asset-form-grid input:focus, .asset-form-grid select:focus, .asset-form-grid textarea:focus { border-color: #58b4a9; outline: 0; }
+.asset-form-grid .form-field small { display: block; margin-top: 5px; color: #94a1aa; font-size: 7px; }
+.asset-description-field { grid-column: 1 / -1; }
+.asset-detail-heading { align-items: flex-start; }
+.asset-detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: start; gap: 16px; }
+.asset-detail-main, .asset-detail-aside { display: grid; gap: 15px; min-width: 0; }
+.asset-description { white-space: pre-wrap; overflow-wrap: anywhere; }
+.asset-history-list { display: grid; }
+.asset-history-item { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; padding: 14px 0; border-top: 1px solid #eef2f4; }
+.asset-history-mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #438d82; background: #eaf5f1; font-size: 13px; }
+.asset-repair-mark { color: #a77738; background: #fbf2e3; }
+.asset-history-item strong { color: #516879; font-size: 9px; }
+.asset-history-item p { margin: 6px 0 4px; color: #718392; font-size: 8px; line-height: 1.5; }
+.asset-history-item small { color: #98a4ac; font-size: 7px; line-height: 1.5; }
+.asset-current-label { color: #3e8b78 !important; }
+.asset-history-empty { padding: 14px 0; color: #99a5ad; font-size: 8px; }
+.asset-history-copy { min-width: 0; }
+.asset-record-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.asset-record-actions { display: flex; gap: 12px; margin-top: 7px; }
+.asset-record-actions .text-action { font-size: 8px; }
+.asset-maintenance-form { display: grid; gap: 12px; margin-top: 14px; padding-top: 15px; border-top: 1px solid #edf1f3; }
+.asset-subsection-heading { display: grid; gap: 4px; }
+.asset-subsection-heading strong { color: #516879; font-size: 9px; }
+.asset-subsection-heading span { color: #96a3ab; font-size: 8px; }
+.asset-form-actions { display: flex; justify-content: flex-end; }
+.asset-checkbox-label { display: flex; align-items: center; gap: 7px; color: #7b8b96; font-size: 8px; }
+.asset-checkbox-label input { accent-color: #58a79b; }
+.asset-detail-aside .ticket-assignment-form textarea, .asset-detail-aside .ticket-assignment-form input:not([type="checkbox"], [type="submit"]) { width: 100%; padding: 9px; border: 1px solid #dfe6eb; border-radius: 5px; color: #53677a; font: inherit; font-size: 9px; }
+.asset-detail-aside .ticket-assignment-form textarea { resize: vertical; }
+.asset-detail-aside .ticket-upload-form select { min-height: 34px; padding: 0 8px; border: 1px solid #dfe6eb; border-radius: 5px; color: #53677a; background: #fff; font-size: 8px; }
+
+@media (max-width: 980px) {
+  .asset-detail-grid { grid-template-columns: minmax(0, 1fr) 270px; }
+}
+
+@media (max-width: 760px) {
+  .asset-detail-grid { grid-template-columns: 1fr; }
+  .asset-detail-aside { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+
+@media (max-width: 620px) {
+  .asset-toolbar { gap: 8px; }
+  .asset-toolbar .directory-count { width: 100%; }
+  .asset-toolbar .search-box { flex-basis: 100%; }
+  .asset-detail-aside { grid-template-columns: 1fr; }
+  .asset-form-grid { grid-template-columns: 1fr; }
+  .asset-description-field { grid-column: auto; }
+  .asset-form-card { padding: 16px; }
+}

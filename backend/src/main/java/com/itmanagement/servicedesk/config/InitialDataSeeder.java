@@ -39,20 +39,33 @@ public class InitialDataSeeder implements ApplicationRunner {
             Map.entry("tickets:comment", "Add public ticket comments"),
             Map.entry("tickets:comment_internal", "Add internal ticket notes"),
             Map.entry("tickets:attach", "Upload and download ticket attachments"),
-            Map.entry("tickets:delete", "Delete tickets and manage all ticket records"));
+            Map.entry("tickets:delete", "Delete tickets and manage all ticket records"),
+            Map.entry("assets:read", "View and search the complete asset inventory"),
+            Map.entry("assets:read_own", "View assets currently assigned to the account"),
+            Map.entry("assets:create", "Add assets to the inventory"),
+            Map.entry("assets:update", "Update asset details"),
+            Map.entry("assets:assign", "Assign and return assets"),
+            Map.entry("assets:maintenance", "Record asset repairs and maintenance"),
+            Map.entry("assets:document", "Upload and remove asset documents"),
+            Map.entry("assets:delete", "Retire assets from active inventory"));
 
     private static final Set<String> REQUESTER_PERMISSIONS = Set.of(
-            "departments:read", "tickets:read", "tickets:create", "tickets:comment", "tickets:attach");
+            "departments:read", "tickets:read", "tickets:create", "tickets:comment", "tickets:attach",
+            "assets:read_own");
 
     private static final Set<String> SUPPORT_PERMISSIONS = Set.of(
             "departments:read", "tickets:read", "tickets:read_all", "tickets:create", "tickets:update",
             "tickets:assign", "tickets:status", "tickets:comment", "tickets:comment_internal", "tickets:attach");
 
+    private static final Set<String> ASSET_MANAGER_PERMISSIONS = Set.of(
+            "departments:read", "assets:read", "assets:read_own", "assets:create", "assets:update",
+            "assets:assign", "assets:maintenance", "assets:document", "assets:delete");
+
     private static final Map<String, RoleDefinition> ROLES = Map.of(
             "ADMIN", new RoleDefinition("Administrator", "Manage users, access, and system settings", Set.copyOf(PERMISSIONS.keySet())),
             "EMPLOYEE", new RoleDefinition("Employee", "Create tickets and request equipment", REQUESTER_PERMISSIONS),
             "SUPPORT_AGENT", new RoleDefinition("Support Agent", "Handle support tickets", SUPPORT_PERMISSIONS),
-            "IT_ASSET_MANAGER", new RoleDefinition("IT Asset Manager", "Manage inventory and asset assignments", REQUESTER_PERMISSIONS),
+            "IT_ASSET_MANAGER", new RoleDefinition("IT Asset Manager", "Manage inventory, assignments, and maintenance", ASSET_MANAGER_PERMISSIONS),
             "DEPARTMENT_MANAGER", new RoleDefinition("Department Manager", "Review department equipment requests", REQUESTER_PERMISSIONS),
             "PROCUREMENT_FINANCE", new RoleDefinition("Procurement/Finance", "Manage purchasing and expenses", REQUESTER_PERMISSIONS));
 

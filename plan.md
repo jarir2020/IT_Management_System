@@ -83,9 +83,20 @@ Use Spring Boot's dependency management for compatible Spring and third-party ve
 | --- | --- | --- |
 | 1. Authentication and administration | Complete | Session login/logout, database-backed roles and permissions, users, and departments. |
 | 2. Ticketing | Complete | Ticket CRUD, support assignment, Open → In Progress → Resolved → Closed workflow, public comments, support-only internal notes, and access-checked private attachments. |
-| 3–7. Remaining modules and release work | Planned | Asset management, approvals, reports/imports, notifications/chat/SLA/audit, and automated tests/deployment. |
+| 3. Asset management | Complete | Inventory CRUD, assignment and return history, maintenance records, and private purchase/warranty documents. |
+| 4–7. Remaining modules and release work | Planned | Equipment requests and approvals, reports/imports, notifications/chat/SLA/audit, and automated tests/deployment. |
 
 Phase 2 uses the module layout below for both Java and AngularJS. Future feature phases should keep their controllers, models, routes, repositories/services where applicable, and views inside their own module directories.
+
+### Phase 3 implementation scope
+
+- Track each inventory item by a unique asset tag, category, description/specifications, vendor/model/serial details, purchase date and cost, and warranty end date.
+- Support asset states `AVAILABLE`, `ASSIGNED`, `UNDER_MAINTENANCE`, and `RETIRED`.
+- Give asset managers an inventory list, filters, asset detail, create/edit, and lifecycle actions. Employees can view only assets assigned to their own account.
+- Record assignment and return events with employee, actor, timestamps, and condition notes. Preserve past assignments as history.
+- Record maintenance/repair work with status, dates, notes, and cost; returning an item to service makes it available unless it remains assigned.
+- Store purchase receipts and warranty documents outside the public web root, associate each file with its asset and document type, and check asset access on upload, download, and removal.
+- Add additive Flyway migrations and database-backed permissions for asset read, own-asset read, create/update, assignment, maintenance, document, and delete actions.
 
 ## Key design decision
 

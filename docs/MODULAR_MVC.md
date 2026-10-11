@@ -13,6 +13,7 @@ modules/
 ├── departments/{controller,model,routes,repository,service}/
 ├── access/{controller,model,routes,repository,service}/
 ├── tickets/{controller,model,routes,repository,service}/
+├── assets/{controller,model,routes,repository,service}/
 └── shared/
 ```
 
@@ -23,7 +24,7 @@ modules/
 - `service/` holds domain rules and coordinates persistence and other module dependencies.
 - `shared/` is for code that is genuinely used across feature boundaries.
 
-For example, Tickets owns `TicketController`, `TicketService`, ticket entities and DTOs, ticket repositories, and `TicketRoutes`. Ticket records use the shared user accounts for requesters and assignees.
+For example, Tickets owns `TicketController`, `TicketService`, ticket entities and DTOs, ticket repositories, and `TicketRoutes`. Assets owns its inventory, assignment, maintenance, and document records. Both modules reference shared user accounts while enforcing their own access rules.
 
 ## AngularJS modules
 
@@ -36,6 +37,7 @@ modules/
 ├── departments/{controllers.js,model.js,routes.js,views/}
 ├── access/{controllers.js,model.js,routes.js,views/}
 ├── tickets/{controllers.js,model.js,routes.js,views/}
+├── assets/{controllers.js,model.js,routes.js,views/}
 ├── workspace/{controllers.js,routes.js,views/}
 ├── dashboard/{controllers.js,routes.js,views/}
 ├── registry.js
@@ -63,4 +65,6 @@ Feature view
   → feature view
 ```
 
-For a ticket attachment, the Tickets model sends multipart form data to the Tickets controller. The service checks the ticket access rules, stores a private file, and records its metadata. Downloads pass through the same ticket access check; stored files are never exposed as static web content.
+For a ticket attachment or asset document, that feature's AngularJS model sends multipart form data to its Spring controller. The module service checks record access, stores a private file, and records its metadata. Downloads pass through the same access check; stored files are never exposed as static web content.
+
+The Assets API is rooted at `/api/v1/assets`. Its controller exposes inventory list/detail/create/update, assignment and return, maintenance start/status changes, document upload/download/removal, and retirement. Employees receive only assets currently assigned to their account; asset managers and administrators can inspect the inventory. Retired records remain available in history.

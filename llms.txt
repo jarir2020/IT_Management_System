@@ -17,4 +17,4 @@
 
 ## Current implementation
 
-Phases 1 and 2 cover authentication, access control, users, departments, and ticket workflows. The next planned phase is asset inventory, assignments, maintenance, and returns.
+Phases 1–3 cover authentication, access control, users, departments, ticket workflows, and asset inventory with assignments, returns, maintenance, and private documents. The next phase is equipment requests and approvals.

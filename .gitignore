@@ -12,7 +12,7 @@
 /frontend/.vite/
 
 # Runtime uploads and local databases
-/backend/var/uploads/
+**/var/uploads/
 *.sqlite
 *.sqlite3
 *.db

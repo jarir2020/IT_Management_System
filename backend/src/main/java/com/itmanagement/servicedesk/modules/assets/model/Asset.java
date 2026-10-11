@@ -57,6 +57,12 @@ public class Asset {
     @Column(name = "warranty_expires_on")
     private LocalDate warrantyExpiresOn;
 
+    @Column(name = "useful_life_months")
+    private Integer usefulLifeMonths;
+
+    @Column(name = "salvage_value", nullable = false, precision = 12, scale = 2)
+    private BigDecimal salvageValue = BigDecimal.ZERO;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 24)
     private AssetStatus status = AssetStatus.AVAILABLE;
@@ -80,14 +86,16 @@ public class Asset {
 
     public Asset(String assetTag, String name, AssetCategory category, String description,
                  String manufacturer, String modelNumber, String serialNumber, LocalDate purchaseDate,
-                 BigDecimal purchaseCost, LocalDate warrantyExpiresOn) {
+                 BigDecimal purchaseCost, LocalDate warrantyExpiresOn,
+                 Integer usefulLifeMonths, BigDecimal salvageValue) {
         updateDetails(assetTag, name, category, description, manufacturer, modelNumber,
-                serialNumber, purchaseDate, purchaseCost, warrantyExpiresOn);
+                serialNumber, purchaseDate, purchaseCost, warrantyExpiresOn, usefulLifeMonths, salvageValue);
     }
 
     public void updateDetails(String assetTag, String name, AssetCategory category, String description,
                               String manufacturer, String modelNumber, String serialNumber,
-                              LocalDate purchaseDate, BigDecimal purchaseCost, LocalDate warrantyExpiresOn) {
+                              LocalDate purchaseDate, BigDecimal purchaseCost, LocalDate warrantyExpiresOn,
+                              Integer usefulLifeMonths, BigDecimal salvageValue) {
         this.assetTag = assetTag;
         this.name = name;
         this.category = category;
@@ -98,6 +106,8 @@ public class Asset {
         this.purchaseDate = purchaseDate;
         this.purchaseCost = purchaseCost;
         this.warrantyExpiresOn = warrantyExpiresOn;
+        this.usefulLifeMonths = usefulLifeMonths;
+        this.salvageValue = salvageValue == null ? BigDecimal.ZERO : salvageValue;
     }
 
     public void assignTo(UserAccount user) {
@@ -144,6 +154,8 @@ public class Asset {
     public LocalDate getPurchaseDate() { return purchaseDate; }
     public BigDecimal getPurchaseCost() { return purchaseCost; }
     public LocalDate getWarrantyExpiresOn() { return warrantyExpiresOn; }
+    public Integer getUsefulLifeMonths() { return usefulLifeMonths; }
+    public BigDecimal getSalvageValue() { return salvageValue; }
     public AssetStatus getStatus() { return status; }
     public UserAccount getAssignedTo() { return assignedTo; }
     public Instant getCreatedAt() { return createdAt; }

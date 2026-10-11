@@ -17,6 +17,8 @@
 
 ## Current implementation
 
-Phases 1–4 cover authentication, access control, users, departments, ticket workflows, asset inventory with assignments/returns/maintenance/private documents, and equipment requests with department approval, inventory allocation, and procurement tracking.
+Phases 1–5 cover authentication, access control, users, departments, ticket workflows, asset inventory with assignments/returns/maintenance/private documents, equipment requests with approvals/allocation/procurement, and role-scoped PDF/Excel reports plus asset workbook imports.
 
 The requests API is rooted at `/api/v1/requests`. Department managers are limited to requests submitted by members of their department and cannot review their own requests. Asset managers allocate available matching inventory or route approved requests to procurement. Procurement records purchases and delivery; asset managers register received equipment in Inventory and allocate it. Request-linked asset assignments retain the originating request ID.
+
+The reports API is rooted at `/api/v1/reports`. It exports accessible asset, ticket, and equipment request datasets as PDF and Excel, builds a role-filtered ZIP bundle, and imports `.xlsx` asset rows with validation results. Start local development with `./start-backend.sh` and `./start-frontend.sh`; browse at `http://127.0.0.1:5173`.

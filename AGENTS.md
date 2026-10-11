@@ -26,12 +26,13 @@
 ## Local commands
 
 ```sh
-docker compose up -d mysql
-cd backend && mvn spring-boot:run
-cd frontend && npm install && npm run dev
+cp .env.example .env    # replace the example database and administrator passwords
+./start-backend.sh     # terminal 1: starts MySQL and the Spring Boot API
+./start-frontend.sh    # terminal 2: starts the AngularJS/Vite client
+# browse http://127.0.0.1:5173
 ```
 
-Build the backend with `cd backend && mvn -DskipTests package` and the frontend with `cd frontend && npm run build`. Automated tests are a later roadmap phase; do not describe a build as a test run.
+To stop MySQL while retaining its data, run `docker compose stop mysql`. Build the backend with `cd backend && mvn -DskipTests package` and the frontend with `cd frontend && npm run build`. Automated tests are a later roadmap phase; do not describe a build as a test run.
 
 ## Repository hygiene
 

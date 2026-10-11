@@ -2,6 +2,8 @@ package com.itmanagement.servicedesk.modules.assets.model;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -20,5 +22,7 @@ public record AssetRequest(
         @Size(max = 100) String serialNumber,
         @PastOrPresent LocalDate purchaseDate,
         @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal purchaseCost,
-        LocalDate warrantyExpiresOn) {
+        LocalDate warrantyExpiresOn,
+        @Min(1) @Max(1200) Integer usefulLifeMonths,
+        @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) BigDecimal salvageValue) {
 }

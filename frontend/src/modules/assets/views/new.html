@@ -20,6 +20,8 @@
     <div class="form-field"><label for="asset-purchase-date">Purchase date</label><input id="asset-purchase-date" type="date" ng-model="vm.form.purchaseDate" /></div>
     <div class="form-field"><label for="asset-purchase-cost">Purchase cost</label><input id="asset-purchase-cost" type="number" min="0" step="0.01" ng-model="vm.form.purchaseCost" /></div>
     <div class="form-field"><label for="asset-warranty-date">Warranty ends</label><input id="asset-warranty-date" type="date" ng-model="vm.form.warrantyExpiresOn" /></div>
+    <div class="form-field"><label for="asset-useful-life">Useful life</label><input id="asset-useful-life" type="number" min="1" max="1200" step="1" ng-model="vm.form.usefulLifeMonths" placeholder="Months" /><small>Used for straight-line depreciation reports.</small></div>
+    <div class="form-field"><label for="asset-salvage-value">Salvage value</label><input id="asset-salvage-value" type="number" min="0" step="0.01" ng-model="vm.form.salvageValue" /><small>Estimated value at the end of useful life.</small></div>
     <div class="form-field asset-description-field"><label for="asset-description">Description and specifications</label><textarea id="asset-description" ng-model="vm.form.description" maxlength="5000" rows="4"></textarea></div>
   </div>
   <div class="ticket-form-footer"><span>New assets enter inventory as Available.</span><div><a class="button button-quiet" ui-sref="workspace.assets">Cancel</a><button class="button button-primary" type="submit" ng-disabled="assetCreateForm.$invalid || vm.saving">{{ vm.saving ? 'Saving…' : 'Save asset' }}</button></div></div>

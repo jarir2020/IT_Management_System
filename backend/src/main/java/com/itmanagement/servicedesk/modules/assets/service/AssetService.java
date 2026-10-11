@@ -79,12 +79,23 @@ public class AssetService {
 
     @Transactional
     public AssetDetailResponse createAsset(AssetRequest request) {
+        return toDetail(saveNewAsset(request));
+    }
+
+    @Transactional
+    public AssetSummary createImportedAsset(AssetRequest request) {
+        return toSummary(saveNewAsset(request));
+    }
+
+    private Asset saveNewAsset(AssetRequest request) {
+        validateDepreciationInputs(request);
         String tag = normalizeTag(request.assetTag());
         ensureUniqueAssetDetails(tag, clean(request.serialNumber()), null);
         Asset asset = new Asset(tag, request.name().trim(), request.category(), clean(request.description()),
                 clean(request.manufacturer()), clean(request.modelNumber()), clean(request.serialNumber()),
-                request.purchaseDate(), request.purchaseCost(), request.warrantyExpiresOn());
-        return toDetail(assets.save(asset));
+                request.purchaseDate(), request.purchaseCost(), request.warrantyExpiresOn(),
+                request.usefulLifeMonths(), request.salvageValue());
+        return assets.save(asset);
     }
 
     @Transactional(readOnly = true)
@@ -99,11 +110,24 @@ public class AssetService {
             throw conflict("Retired assets cannot be edited");
         }
         String tag = normalizeTag(request.assetTag());
+        validateDepreciationInputs(request);
         ensureUniqueAssetDetails(tag, clean(request.serialNumber()), assetId);
         asset.updateDetails(tag, request.name().trim(), request.category(), clean(request.description()),
                 clean(request.manufacturer()), clean(request.modelNumber()), clean(request.serialNumber()),
-                request.purchaseDate(), request.purchaseCost(), request.warrantyExpiresOn());
+                request.purchaseDate(), request.purchaseCost(), request.warrantyExpiresOn(),
+                request.usefulLifeMonths(), request.salvageValue());
         return toDetail(asset);
+    }
+
+    private static void validateDepreciationInputs(AssetRequest request) {
+        if (request.salvageValue() != null && request.salvageValue().signum() > 0
+                && request.purchaseCost() == null) {
+            throw badRequest("Record a purchase cost before setting a salvage value");
+        }
+        if (request.salvageValue() != null && request.purchaseCost() != null
+                && request.salvageValue().compareTo(request.purchaseCost()) > 0) {
+            throw badRequest("Salvage value cannot exceed purchase cost");
+        }
     }
 
     @Transactional
@@ -277,7 +301,8 @@ public class AssetService {
                 .toList();
         return new AssetDetailResponse(asset.getId(), asset.getAssetTag(), asset.getName(), asset.getCategory(),
                 asset.getDescription(), asset.getManufacturer(), asset.getModelNumber(), asset.getSerialNumber(),
-                asset.getPurchaseDate(), asset.getPurchaseCost(), asset.getWarrantyExpiresOn(), asset.getStatus(),
+                asset.getPurchaseDate(), asset.getPurchaseCost(), asset.getWarrantyExpiresOn(),
+                asset.getUsefulLifeMonths(), asset.getSalvageValue(), asset.getStatus(),
                 toUserSummary(asset.getAssignedTo()), asset.getCreatedAt(), asset.getUpdatedAt(),
                 assignmentHistory, maintenanceHistory, assetDocuments);
     }

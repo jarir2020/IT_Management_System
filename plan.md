@@ -85,7 +85,9 @@ Use Spring Boot's dependency management for compatible Spring and third-party ve
 | 2. Ticketing | Complete | Ticket CRUD, support assignment, Open → In Progress → Resolved → Closed workflow, public comments, support-only internal notes, and access-checked private attachments. |
 | 3. Asset management | Complete | Inventory CRUD, assignment and return history, maintenance records, and private purchase/warranty documents. |
 | 4. Equipment requests and approvals | Complete | Employee requests, department-scoped approval, IT inventory allocation, and procurement when stock is unavailable. |
-| 5–7. Reports, operations, and release work | Planned | Reports/imports, notifications/chat/SLA/audit, and automated tests/deployment. |
+| 5. Reports and data exchange | Complete | Role-scoped PDF/Excel reports, asset workbook import, maintenance expense totals, straight-line depreciation, and permission-scoped ZIP bundles. |
+| 6. Operations | Planned | Email, live chat, SLA calculations, and audit logs. |
+| 7. Quality and release | Planned | Automated tests, deployment configuration, and deployment documentation. |
 
 Phase 2 uses the module layout below for both Java and AngularJS. Future feature phases should keep their controllers, models, routes, repositories/services where applicable, and views inside their own module directories.
 
@@ -108,6 +110,15 @@ Phase 2 uses the module layout below for both Java and AngularJS. Future feature
 - Keep the request lifecycle explicit (`PENDING_APPROVAL`, `APPROVED`, `REJECTED`, `PENDING_PROCUREMENT`, `PURCHASING`, `READY_FOR_ALLOCATION`, `FULFILLED`, and `CANCELLED`) and retain requester, approver, procurement, allocation, and timestamp details.
 - Associate request-based asset assignments with their equipment request, and use database-backed permissions plus service-level ownership and department checks for every action.
 - Keep the complete request workflow inside backend and AngularJS `requests` modules, each with its own routes, controller, model, and views; document the module in the modular MVC guide.
+
+### Phase 5 implementation scope
+
+- Provide role-gated PDF and Excel reports for asset inventory, service tickets, and equipment requests. ZIP downloads include the report types the signed-in user's role permits.
+- Include asset maintenance expense totals and straight-line depreciation in inventory reporting. Store useful life and salvage value per asset so the exported book values use recorded assumptions instead of a hard-coded lifespan.
+- Provide an asset `.xlsx` import template and a bulk import action. Require asset tag, name, and category; accept optional manufacturer, model, serial, purchase date/cost, warranty date, description, useful life months, and salvage value columns. Validate each row, cap imports at 1,000 rows and 10 MB, and return imported/skipped counts with row-level errors.
+- Route imported assets through the Assets module service so bulk import uses the same normalization and duplicate checks as normal inventory entry.
+- Keep report endpoints and the AngularJS report screen in their own `reports` MVC module, and assign report/import permissions to the relevant built-in roles.
+- Add simple local start scripts for MySQL/API and the AngularJS dev server, and document the browser URL and first-run bootstrap login setup.
 
 ## Key design decision
 

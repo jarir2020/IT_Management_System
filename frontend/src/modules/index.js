@@ -16,3 +16,6 @@ import './assets/controllers.js';
 import './assets/file-input.directive.js';
 import './requests/model.js';
 import './requests/controllers.js';
+import './reports/model.js';
+import './reports/controllers.js';
+import './reports/file-input.directive.js';

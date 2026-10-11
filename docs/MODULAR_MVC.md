@@ -15,6 +15,7 @@ modules/
 ├── tickets/{controller,model,routes,repository,service}/
 ├── assets/{controller,model,routes,repository,service}/
 ├── requests/{controller,model,routes,repository,service}/
+├── reports/{controller,model,routes,service}/
 └── shared/
 ```
 
@@ -40,6 +41,7 @@ modules/
 ├── tickets/{controllers.js,model.js,routes.js,views/}
 ├── assets/{controllers.js,model.js,routes.js,views/}
 ├── requests/{controllers.js,model.js,routes.js,views/}
+├── reports/{controllers.js,model.js,routes.js,views/}
 ├── workspace/{controllers.js,routes.js,views/}
 ├── dashboard/{controllers.js,routes.js,views/}
 ├── registry.js
@@ -72,3 +74,5 @@ For a ticket attachment or asset document, that feature's AngularJS model sends 
 The Assets API is rooted at `/api/v1/assets`. Its controller exposes inventory list/detail/create/update, assignment and return, maintenance start/status changes, document upload/download/removal, and retirement. Employees receive only assets currently assigned to their account; asset managers and administrators can inspect the inventory. Retired records remain available in history.
 
 The Equipment Requests API is rooted at `/api/v1/requests`. It supports submission and requester cancellation, department-scoped approval/rejection, stock-unavailable routing, purchase recording, receipt, and inventory allocation. A request-based assignment is stored in the asset assignment history with its equipment request ID.
+
+Reports and Imports owns `/api/v1/reports`, PDF/Excel generation, ZIP bundles, and workbook parsing. Its service reads feature repositories for report data and delegates imported inventory rows to the Assets service so duplicate and normalization rules stay in one place.

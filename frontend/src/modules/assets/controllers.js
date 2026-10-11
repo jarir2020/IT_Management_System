@@ -68,7 +68,7 @@ featureModules.assets.controller('AssetListController', ['AuthService', 'AssetMo
 featureModules.assets.controller('AssetCreateController', ['$state', 'AssetModel', function ($state, AssetModel) {
   const vm = this;
   vm.categories = categories;
-  vm.form = { assetTag: '', name: '', category: 'LAPTOP', purchaseDate: null, purchaseCost: null, warrantyExpiresOn: null };
+  vm.form = { assetTag: '', name: '', category: 'LAPTOP', purchaseDate: null, purchaseCost: null, warrantyExpiresOn: null, usefulLifeMonths: null, salvageValue: 0 };
   vm.saving = false;
   vm.error = '';
 
@@ -127,7 +127,9 @@ featureModules.assets.controller('AssetDetailController', [
         serialNumber: vm.asset.serialNumber,
         purchaseDate: localDate(vm.asset.purchaseDate),
         purchaseCost: vm.asset.purchaseCost,
-        warrantyExpiresOn: localDate(vm.asset.warrantyExpiresOn)
+        warrantyExpiresOn: localDate(vm.asset.warrantyExpiresOn),
+        usefulLifeMonths: vm.asset.usefulLifeMonths,
+        salvageValue: vm.asset.salvageValue ?? 0
       };
     };
 

@@ -28,6 +28,8 @@
           <div><dt>Purchase date</dt><dd>{{ vm.asset.purchaseDate ? (vm.asset.purchaseDate | date:'MMM d, yyyy') : 'Not recorded' }}</dd></div>
           <div><dt>Purchase cost</dt><dd>{{ vm.asset.purchaseCost != null ? (vm.asset.purchaseCost | currency) : 'Not recorded' }}</dd></div>
           <div><dt>Warranty ends</dt><dd>{{ vm.asset.warrantyExpiresOn ? (vm.asset.warrantyExpiresOn | date:'MMM d, yyyy') : 'Not recorded' }}</dd></div>
+          <div><dt>Useful life</dt><dd>{{ vm.asset.usefulLifeMonths ? (vm.asset.usefulLifeMonths + ' months') : 'Not recorded' }}</dd></div>
+          <div><dt>Salvage value</dt><dd>{{ vm.asset.salvageValue | currency }}</dd></div>
           <div><dt>Description</dt><dd class="asset-description">{{ vm.asset.description || 'No description recorded.' }}</dd></div>
         </dl>
         <form ng-if="vm.editing" name="assetEditForm" ng-submit="vm.save(assetEditForm)" novalidate>
@@ -41,6 +43,8 @@
             <div class="form-field"><label for="edit-asset-purchase-date">Purchase date</label><input id="edit-asset-purchase-date" type="date" ng-model="vm.editForm.purchaseDate" /></div>
             <div class="form-field"><label for="edit-asset-purchase-cost">Purchase cost</label><input id="edit-asset-purchase-cost" type="number" min="0" step="0.01" ng-model="vm.editForm.purchaseCost" /></div>
             <div class="form-field"><label for="edit-asset-warranty-date">Warranty ends</label><input id="edit-asset-warranty-date" type="date" ng-model="vm.editForm.warrantyExpiresOn" /></div>
+            <div class="form-field"><label for="edit-asset-useful-life">Useful life</label><input id="edit-asset-useful-life" type="number" min="1" max="1200" step="1" ng-model="vm.editForm.usefulLifeMonths" placeholder="Months" /></div>
+            <div class="form-field"><label for="edit-asset-salvage-value">Salvage value</label><input id="edit-asset-salvage-value" type="number" min="0" step="0.01" ng-model="vm.editForm.salvageValue" /></div>
             <div class="form-field asset-description-field"><label for="edit-asset-description">Description</label><textarea id="edit-asset-description" ng-model="vm.editForm.description" maxlength="5000" rows="4"></textarea></div>
           </div>
           <div class="modal-actions"><button class="button button-quiet" type="button" ng-click="vm.editing = false">Cancel</button><button class="button button-primary" type="submit" ng-disabled="assetEditForm.$invalid || vm.saving">{{ vm.saving ? 'Saving…' : 'Save changes' }}</button></div>

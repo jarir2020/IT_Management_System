@@ -1,0 +1,43 @@
+<section class="page-heading compact-heading">
+  <div>
+    <div class="breadcrumb-label">WORKSPACE <span>/</span> OPERATIONS</div>
+    <h1>Reports & data exchange<span class="heading-period">.</span></h1>
+    <p class="page-intro">Download current operational data or import inventory from a reviewed workbook.</p>
+  </div>
+  <a class="button button-primary" ng-if="vm.can('reports:assets') || vm.can('reports:tickets') || vm.can('reports:requests') || vm.can('reports:requests_department')" href="/api/v1/reports/bundle.zip">Download ZIP bundle</a>
+</section>
+
+<section class="report-card-grid">
+  <article class="ticket-panel report-card" ng-if="vm.can('reports:assets')">
+    <span class="section-kicker">INVENTORY</span><h2>Asset inventory</h2>
+    <p>Inventory, assigned users, maintenance expenses, and straight-line depreciation estimates.</p>
+    <div class="report-actions"><a class="button button-quiet" href="/api/v1/reports/assets.pdf">Download PDF</a><a class="button button-primary" href="/api/v1/reports/assets.xlsx">Download Excel</a></div>
+  </article>
+  <article class="ticket-panel report-card" ng-if="vm.can('reports:tickets')">
+    <span class="section-kicker">SERVICE DESK</span><h2>Ticket queue</h2>
+    <p>Ticket title, requester, assignee, category, priority, status, and timestamps.</p>
+    <div class="report-actions"><a class="button button-quiet" href="/api/v1/reports/tickets.pdf">Download PDF</a><a class="button button-primary" href="/api/v1/reports/tickets.xlsx">Download Excel</a></div>
+  </article>
+  <article class="ticket-panel report-card" ng-if="vm.can('reports:requests') || vm.can('reports:requests_department')">
+    <span class="section-kicker">EQUIPMENT</span><h2>Equipment requests</h2>
+    <p>Request status, requester, department, procurement details, and allocated asset.</p>
+    <div class="report-actions"><a class="button button-quiet" href="/api/v1/reports/requests.pdf">Download PDF</a><a class="button button-primary" href="/api/v1/reports/requests.xlsx">Download Excel</a></div>
+  </article>
+</section>
+
+<section class="ticket-panel asset-form-card report-import-card" ng-if="vm.can('reports:assets_import')">
+  <div class="ticket-panel-heading"><div><span class="section-kicker">BULK INVENTORY</span><h2>Import assets</h2></div><a class="text-action" href="/api/v1/reports/assets/import-template.xlsx">Download workbook template</a></div>
+  <p class="report-import-copy">Upload an .xlsx file with asset_tag, name, and category columns. Imports are limited to 1,000 rows and 10 MB. Each row is checked with the same asset rules as manual entry; invalid or duplicate rows are reported and skipped.</p>
+  <form class="report-import-form" ng-submit="vm.importAssets()">
+    <label for="asset-import-file">Excel workbook</label>
+    <input id="asset-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" report-file-input="vm.selectFile($file)" />
+    <div class="report-import-submit"><span>{{ vm.selectedFile ? vm.selectedFile.name : 'Choose a workbook to continue.' }}</span><button class="button button-primary" type="submit" ng-disabled="!vm.selectedFile || vm.importing">{{ vm.importing ? 'Importing…' : 'Import assets' }}</button></div>
+  </form>
+  <div class="notice notice-error" ng-if="vm.importError" role="alert">{{ vm.importError }}</div>
+  <div class="report-import-result" ng-if="vm.importResult" role="status">
+    <strong>Imported {{ vm.importResult.importedRows }} of {{ vm.importResult.scannedRows }} rows.</strong>
+    <span ng-if="vm.importResult.skippedRows">{{ vm.importResult.skippedRows }} row(s) were skipped. Review the row notes below.</span>
+    <span ng-if="!vm.importResult.skippedRows">All scanned rows were imported.</span>
+    <ul ng-if="vm.importResult.issues.length"><li ng-repeat="issue in vm.importResult.issues track by $index">Row {{ issue.row }}: {{ issue.message }}</li></ul>
+  </div>
+</section>

@@ -7,7 +7,8 @@ featureModules.dashboard.controller('DashboardController', ['AuthService', funct
     { number: '01', title: 'Identity and access', description: 'User accounts, role assignments, and protected permissions are in place.', status: 'Ready' },
     { number: '02', title: 'Departments', description: 'Organize staff by department and keep assignments current.', status: 'Ready' },
     { number: '03', title: 'Service desk', description: 'Create support tickets, add notes, and follow resolution progress.', status: 'Ready' },
-    { number: '04', title: 'Assets and requests', description: 'Inventory, equipment approvals, procurement, and allocation are available.', status: 'Ready' }
+    { number: '04', title: 'Assets and requests', description: 'Inventory, equipment approvals, procurement, and allocation are available.', status: 'Ready' },
+    { number: '05', title: 'Reports and data', description: 'Export PDF/Excel reports and import asset workbooks with row feedback.', status: 'Ready' }
   ];
   AuthService.me().then(user => { vm.user = user; });
 }]);

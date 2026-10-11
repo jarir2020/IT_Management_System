@@ -6,12 +6,12 @@ The application uses a Spring Boot REST API and an AngularJS single-page applica
 
 ## Local setup
 
-1. Copy `.env.example` to `.env` and replace each example password with a strong local value.
-2. Start MySQL with `docker compose up -d mysql`.
-3. In a terminal, load the local variables with `set -a; source .env; set +a`.
-4. Start the API with `cd backend && mvn spring-boot:run`.
-5. In another terminal, start the client with `cd frontend && npm install && npm run dev`.
-6. Open `http://localhost:5173`. Sign in with the bootstrap admin email and password from `.env`.
+1. Copy `.env.example` to `.env` and replace the example database and administrator passwords.
+2. In a terminal at the repository root, run `./start-backend.sh`. It starts MySQL, waits for its health check, and runs the Spring Boot API.
+3. In a second terminal at the repository root, run `./start-frontend.sh`. It installs locked npm packages on first run and starts Vite.
+4. Open **http://127.0.0.1:5173** in a browser. Sign in with `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` from `.env`.
+
+Use Ctrl+C in each terminal to stop its server. Stop the database separately with `docker compose stop mysql`; its Docker volume preserves local data. To start either server manually, see [AGENTS.md](AGENTS.md).
 
 On first startup, Flyway creates the schema and the application seeds its built-in roles and permissions. It creates the initial administrator only when both bootstrap admin variables are set. Existing administrator credentials are not overwritten on later starts.
 
@@ -25,11 +25,15 @@ AngularJS 1.8.3 is end of life. The current dependency tree also reports two adv
 
 ## Current phase
 
-Phases 1–4 are complete: login/logout, database-backed roles and permissions, users and departments, ticket workflows and private attachments, asset inventory and maintenance, and equipment requests with department approval, IT allocation, and procurement tracking. Reports/imports, chat, notifications, SLAs, audit logs, and release automation follow in later phases.
+Phases 1–5 are complete: login/logout, database-backed roles and permissions, users and departments, ticket workflows and private attachments, asset inventory and maintenance, equipment requests with department approval and procurement tracking, plus role-scoped reports, asset workbook import, and report ZIP downloads. Email, chat, SLAs, audit logs, automated tests, and release automation follow later.
 
 ## Equipment requests
 
 Employees submit requests for an equipment category with a business justification. Department managers review requests from their own department and cannot approve their own requests. IT asset managers allocate matching available inventory or route approved requests to Procurement/Finance. Procurement records vendor, reference, cost, and expected delivery, then marks orders received; IT registers the delivered asset in Inventory and completes allocation. Request-linked assignments appear in asset history.
+
+## Reports and imports
+
+Authorized users can export PDF and Excel reports for assets, tickets, and equipment requests, and download a ZIP containing the reports available to their role. IT asset managers can import inventory from `.xlsx`; the importer validates rows individually, uses the same asset rules as manual entry, and returns row-level reasons for skipped records. See [the report and import guide](docs/REPORTS_AND_IMPORTS.md) for permissions and workbook columns.
 
 ## Module structure
 

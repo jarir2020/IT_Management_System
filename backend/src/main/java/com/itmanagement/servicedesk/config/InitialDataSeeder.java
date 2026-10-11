@@ -55,7 +55,13 @@ public class InitialDataSeeder implements ApplicationRunner {
             Map.entry("requests:approve_all", "Review equipment requests across all departments"),
             Map.entry("requests:read_all", "View the complete equipment request queue"),
             Map.entry("requests:allocate", "Allocate inventory and route unavailable requests to procurement"),
-            Map.entry("requests:procure", "Record purchase details and receive ordered equipment"));
+            Map.entry("requests:procure", "Record purchase details and receive ordered equipment"),
+            Map.entry("reports:read", "Open reports and data exchange tools"),
+            Map.entry("reports:assets", "Export the full asset inventory"),
+            Map.entry("reports:tickets", "Export the service desk ticket queue"),
+            Map.entry("reports:requests", "Export equipment requests across departments"),
+            Map.entry("reports:requests_department", "Export equipment requests for the account's department"),
+            Map.entry("reports:assets_import", "Import assets from an Excel workbook"));
 
     private static final Set<String> REQUESTER_PERMISSIONS = Set.of(
             "departments:read", "tickets:read", "tickets:create", "tickets:comment", "tickets:attach",
@@ -63,18 +69,20 @@ public class InitialDataSeeder implements ApplicationRunner {
 
     private static final Set<String> SUPPORT_PERMISSIONS = Set.of(
             "departments:read", "tickets:read", "tickets:read_all", "tickets:create", "tickets:update",
-            "tickets:assign", "tickets:status", "tickets:comment", "tickets:comment_internal", "tickets:attach");
+            "tickets:assign", "tickets:status", "tickets:comment", "tickets:comment_internal", "tickets:attach",
+            "reports:read", "reports:tickets");
 
     private static final Set<String> ASSET_MANAGER_PERMISSIONS = Set.of(
             "departments:read", "assets:read", "assets:read_own", "assets:create", "assets:update",
             "assets:assign", "assets:maintenance", "assets:document", "assets:delete",
-            "requests:read_own", "requests:read_all", "requests:allocate");
+            "requests:read_own", "requests:read_all", "requests:allocate",
+            "reports:read", "reports:assets", "reports:requests", "reports:assets_import");
 
     private static final Set<String> DEPARTMENT_MANAGER_PERMISSIONS = withPermissions(
-            REQUESTER_PERMISSIONS, "requests:approve_department");
+            REQUESTER_PERMISSIONS, "requests:approve_department", "reports:read", "reports:requests_department");
 
     private static final Set<String> PROCUREMENT_PERMISSIONS = withPermissions(
-            REQUESTER_PERMISSIONS, "requests:read_all", "requests:procure");
+            REQUESTER_PERMISSIONS, "requests:read_all", "requests:procure", "reports:read", "reports:requests");
 
     private static final Map<String, RoleDefinition> ROLES = Map.of(
             "ADMIN", new RoleDefinition("Administrator", "Manage users, access, and system settings", Set.copyOf(PERMISSIONS.keySet())),
